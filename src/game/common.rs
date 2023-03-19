@@ -21,5 +21,4 @@ impl Color {
     pub fn BROWN() -> Color { Color { rbg_code: "#B7999C".to_string() }}
     pub fn BLACK() -> Color { Color { rbg_code: "#2D2D34".to_string() }}
     pub fn MILDEW() -> Color { Color { rbg_code: "#8EAF9D".to_string() }}
-    pub fn BLUE() -> Color { Color { rbg_code: "#1F7A8C".to_string() }}
 }

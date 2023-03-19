@@ -22,6 +22,6 @@ impl WorldPosition {
             Direction::Up =>  WorldPosition { x: self.x, y: self.y.checked_sub(1).unwrap_or(0) },
             Direction::Down =>  WorldPosition { x: self.x, y: self.y.checked_add(1).unwrap_or(0) },
         };
-        WorldPosition { x: cmp::min(new_direction.x, clamp_width), y:  cmp::min(new_direction.y, clamp_height) }
+        WorldPosition { x: cmp::min(new_direction.x, clamp_width - 1), y:  cmp::min(new_direction.y, clamp_height - 1) }
     }
 }

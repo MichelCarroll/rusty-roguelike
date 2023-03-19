@@ -1,9 +1,8 @@
 use std::collections::HashSet;
 
-use js_sys::Math::random;
 use specs::prelude::*;
 
-use crate::{game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec}}};
+use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec}};
 
 pub struct LevelGeneration {}
 
@@ -15,10 +14,11 @@ impl<'a> System<'a> for LevelGeneration {
         WriteStorage<'a, WorldPosition>,
         WriteStorage<'a, Render>, 
         WriteStorage<'a, PlayerControlled>, 
-        WriteStorage<'a, Movable>
+        WriteStorage<'a, Movable>, 
+        WriteStorage<'a, Collidable>
     );
 
-    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable): Self::SystemData) {
+    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable): Self::SystemData) {
         for level in (&mut level).join() {
             if level.contents.is_empty() {
 
@@ -73,6 +73,7 @@ impl<'a> System<'a> for LevelGeneration {
                                     .build_entity()
                                     .with(WorldPosition { x, y }, &mut world_position)
                                     .with(stone_render.clone(), &mut render)
+                                    .with(Collidable {}, &mut collidable)
                                     .build()
                             )
                         }
@@ -95,7 +96,7 @@ impl<'a> System<'a> for LevelGeneration {
                             .with(player_position.clone(), &mut world_position)
                             .with(character_render.clone(), &mut render)
                             .with(PlayerControlled::default(), &mut player_controlled)
-                            .with(Movable::default(), &mut movable)
+                            .with(Movable::default(), &mut movable) 
                             .build()
                     );
                 }

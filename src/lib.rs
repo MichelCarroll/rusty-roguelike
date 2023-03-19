@@ -3,7 +3,7 @@ mod game;
 use game::{
     common::CanvasSize,
     components::{
-        player_controlled::{PlayerCommand, PlayerControlled}, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level,
+        player_controlled::{PlayerCommand, PlayerControlled}, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable,
     },
     systems::{rendering::Rendering, player_command_hander::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration},
     world::{LastUserEvent, WorldParameters},
@@ -70,6 +70,8 @@ pub fn start() {
     world.register::<Movable>();
     world.register::<Render>();
     world.register::<Level>(); 
+    world.register::<Collidable>(); 
+
     world.insert(LastUserEvent::default());
     world.insert(WorldParameters { width: 40, height: 40 });
 

@@ -29,7 +29,7 @@ impl<'a> System<'a> for Rendering {
     fn run(&mut self, (pos, render): Self::SystemData) {
         let x_text_offset = CELL_SIZE / 2.0;
         let y_text_offset = CELL_SIZE / 2.0;
-        self.rendering_context.set_font("44px Arial");
+        self.rendering_context.set_font("bold 44px Arial");
         self.rendering_context.set_text_baseline("middle");
         self.rendering_context.set_text_align("center");
         self.rendering_context.set_fill_style(&BACKGROUND_COLOR.into());
@@ -65,9 +65,9 @@ impl<'a> System<'a> for Rendering {
 
             if let Some((glyph, foreground_color)) = render_target.glyph {
                 self.rendering_context
-                    .set_stroke_style(&(foreground_color.rbg_code.into()));
+                    .set_fill_style(&(foreground_color.rbg_code.into()));
                 self.rendering_context
-                    .stroke_text(&glyph.to_string(), x + x_text_offset, y + y_text_offset)
+                    .fill_text(&glyph.to_string(), x + x_text_offset, y + y_text_offset)
                     .unwrap(); 
             }
 

@@ -1,11 +1,11 @@
 
 use specs::{Component, VecStorage};
 
-use crate::common::Color;
+use crate::game::common::Color;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq, Ord)]
 pub enum ZLayer {
-    Ground, Creature
+    Ground, Creature, Saturating
 }
 
 #[derive(Clone, Debug)]

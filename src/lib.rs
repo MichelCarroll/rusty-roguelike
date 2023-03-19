@@ -1,13 +1,12 @@
-mod common;
 mod game;
 
-use common::CanvasSize;
 use game::{
+    common::CanvasSize,
     components::{
         player_controlled::{PlayerCommand, PlayerControlled}, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level,
     },
     systems::{rendering::Rendering, player_command_hander::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration},
-    world::LastUserEvent,
+    world::{LastUserEvent, WorldParameters},
 };
 use specs::prelude::*;
 use std::panic;
@@ -72,6 +71,7 @@ pub fn start() {
     world.register::<Render>();
     world.register::<Level>(); 
     world.insert(LastUserEvent::default());
+    world.insert(WorldParameters { width: 40, height: 40 });
 
     world.create_entity().with(Level::default()).build();
  

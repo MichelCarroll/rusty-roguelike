@@ -93,7 +93,7 @@ pub fn start() {
         .with(Rendering {
             canvas_size: size,
             rendering_context: canvas_handle.context,
-        }, "rendering", &["movement"])
+        }, "rendering", &["movement", "combat", "looting"])
         .build();
 
     dispatcher.dispatch(&mut world);

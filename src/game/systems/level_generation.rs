@@ -152,8 +152,8 @@ impl<'a> System<'a> for LevelGeneration {
                                 .with(Inventoried::default(), &mut inventoried)
                                 .with(Factioned { faction: Faction::Enemy }, &mut factioned)
                                 .with(Collidable {}, &mut collidable)
-                                .with(Damageable { health: 15 }, &mut damageable)
-                                .with(Armed { damage: 2, targetting: None }, &mut armed)
+                                .with(Damageable { health: 10 }, &mut damageable)
+                                .with(Armed { damage: 1, targetting: None }, &mut armed)
                                 .build()
                         );
                     }

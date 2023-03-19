@@ -9,5 +9,5 @@ pub struct LastUserEvent {
 #[derive(Default)]
 pub struct WorldParameters {
     pub width: u64,
-    pub height: u64
+    pub height: u64,
 } 

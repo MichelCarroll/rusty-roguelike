@@ -1,3 +1,4 @@
+use log::info;
 use specs::prelude::*;
 
 use crate::game::{ components::{armed::{Armed}, damageable::Damageable}};
@@ -21,7 +22,7 @@ impl<'a> System<'a> for Combat {
                     }
                 }
             }
-        }   
+        } 
     }
 }
   

@@ -1,5 +1,6 @@
 use std::collections::{HashSet, HashMap};
 
+use log::info;
 use specs::prelude::*;
 
 use crate::game::{ components::{movable::{Movable}, world_position::WorldPosition, collidable::Collidable, armed::Armed, damageable::Damageable}, world::WorldParameters};
@@ -30,7 +31,8 @@ impl<'a> System<'a> for Movement {
                 if let Some (collided_with) = collidable_map.get(&new_world_position) {
                     match (armed, damageable.get(collided_with.clone())) {
                         (Some(armed), Some(_)) => {
-                            armed.targetting = entity.into()
+                            armed.targetting = collided_with.clone().into();
+                            info!("Targeting something?");
                         },
                         _ => {}
                     }

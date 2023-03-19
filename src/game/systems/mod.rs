@@ -4,3 +4,4 @@ pub mod movement;
 pub mod level_generation; 
 pub mod looting; 
 pub mod ai;
+pub mod combat;

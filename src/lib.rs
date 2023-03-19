@@ -3,9 +3,9 @@ mod game;
 use game::{
     common::{CanvasSize, Command},
     components::{
-        player_controlled::PlayerControlled, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::Factioned, ai_controlled::AIControlled,
+        player_controlled::PlayerControlled, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::Factioned, ai_controlled::AIControlled, damageable::Damageable, armed::Armed,
     },
-    systems::{rendering::Rendering, player_command_handler::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration, looting::Looting, ai::AI},
+    systems::{rendering::Rendering, player_command_handler::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration, looting::Looting, ai::AI, combat::Combat},
     world::{LastUserEvent, WorldParameters},
 };
 use specs::prelude::*;
@@ -75,6 +75,8 @@ pub fn start() {
     world.register::<Inventoried>(); 
     world.register::<Factioned>(); 
     world.register::<AIControlled>(); 
+    world.register::<Damageable>(); 
+    world.register::<Armed>(); 
 
     world.insert(LastUserEvent::default());
     world.insert(WorldParameters { width: 30, height: 30 });
@@ -86,6 +88,7 @@ pub fn start() {
         .with(PlayerCommandHandler {}, "player-command-handling", &["level-generation"])
         .with(AI {}, "ai", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
+        .with(Combat {}, "combat", &["movement"])
         .with(Looting {}, "looting", &["movement"])
         .with(Rendering {
             canvas_size: size,
@@ -107,6 +110,7 @@ pub fn start() {
         drop(last_user_event);
 
         dispatcher.dispatch(&mut world);
+        world.maintain();
         e.prevent_default();
     });
     web_sys::window()

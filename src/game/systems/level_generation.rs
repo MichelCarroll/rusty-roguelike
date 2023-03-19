@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use specs::prelude::*;
 
-use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::{Factioned, Faction}, ai_controlled::AIControlled}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec, random_in_vec_and_remove}};
+use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::{Factioned, Faction}, ai_controlled::AIControlled, damageable::{Damageable, self}, armed::Armed}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec, random_in_vec_and_remove}};
 
 pub struct LevelGeneration {}
 
@@ -19,10 +19,12 @@ impl<'a> System<'a> for LevelGeneration {
         WriteStorage<'a, Pickupable>, 
         WriteStorage<'a, Inventoried>, 
         WriteStorage<'a, Factioned>,
-        WriteStorage<'a, AIControlled>
+        WriteStorage<'a, AIControlled>,
+        WriteStorage<'a, Damageable>,
+        WriteStorage<'a, Armed>
     );
 
-    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable, mut pickupable, mut inventoried, mut factioned, mut ai_controlled): Self::SystemData) {
+    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable, mut pickupable, mut inventoried, mut factioned, mut ai_controlled, mut damageable, mut armed): Self::SystemData) {
         for level in (&mut level).join() {
             if level.contents.is_empty() {
 
@@ -104,6 +106,8 @@ impl<'a> System<'a> for LevelGeneration {
                             .with(Inventoried::default(), &mut inventoried)
                             .with(Factioned { faction: Faction::Player }, &mut factioned)
                             .with(Collidable {}, &mut collidable)
+                            .with(Damageable { health: 100 }, &mut damageable)
+                            .with(Armed { damage: 5, targetting: None }, &mut armed)
                             .build()
                     );
                 }
@@ -148,6 +152,8 @@ impl<'a> System<'a> for LevelGeneration {
                                 .with(Inventoried::default(), &mut inventoried)
                                 .with(Factioned { faction: Faction::Enemy }, &mut factioned)
                                 .with(Collidable {}, &mut collidable)
+                                .with(Damageable { health: 15 }, &mut damageable)
+                                .with(Armed { damage: 2, targetting: None }, &mut armed)
                                 .build()
                         );
                     }

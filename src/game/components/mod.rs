@@ -8,3 +8,5 @@ pub mod pickupable;
 pub mod inventoried;
 pub mod factioned;
 pub mod ai_controlled;
+pub mod damageable;
+pub mod armed;

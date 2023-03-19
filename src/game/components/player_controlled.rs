@@ -1,16 +1,10 @@
 use specs::{Component, VecStorage};
 
-#[derive(Debug)]
-pub enum PlayerCommand {
-    GoRight,
-    GoLeft,
-    GoUp,
-    GoDown,
-}
+use crate::game::common::Command;
 
 #[derive(Default)]
 pub struct PlayerControlled {
-    pub unprocessed_action: Option<PlayerCommand>,
+    pub unprocessed_action: Option<Command>,
 }
 
 impl Component for PlayerControlled {

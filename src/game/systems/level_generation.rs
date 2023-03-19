@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use specs::prelude::*;
 
-use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable, pickupable::{Pickupable, self}, inventoried::Inventoried}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec, random_in_vec_and_remove}};
+use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::{Factioned, Faction}, ai_controlled::AIControlled}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec, random_in_vec_and_remove}};
 
 pub struct LevelGeneration {}
 
@@ -17,10 +17,12 @@ impl<'a> System<'a> for LevelGeneration {
         WriteStorage<'a, Movable>, 
         WriteStorage<'a, Collidable>, 
         WriteStorage<'a, Pickupable>, 
-        WriteStorage<'a, Inventoried>
+        WriteStorage<'a, Inventoried>, 
+        WriteStorage<'a, Factioned>,
+        WriteStorage<'a, AIControlled>
     );
 
-    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable, mut pickupable, mut inventoried): Self::SystemData) {
+    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable, mut pickupable, mut inventoried, mut factioned, mut ai_controlled): Self::SystemData) {
         for level in (&mut level).join() {
             if level.contents.is_empty() {
 
@@ -31,7 +33,7 @@ impl<'a> System<'a> for LevelGeneration {
                     z_layer: ZLayer::Ground
                 };
 
-                let stone_render = Render {
+                let stone_render = Render {  
                     glyph: '#'.into(),
                     foreground_color: Color::BROWN(),
                     background_color: Color::BLACK().into(),
@@ -100,6 +102,8 @@ impl<'a> System<'a> for LevelGeneration {
                             .with(PlayerControlled::default(), &mut player_controlled)
                             .with(Movable::default(), &mut movable) 
                             .with(Inventoried::default(), &mut inventoried)
+                            .with(Factioned { faction: Faction::Player }, &mut factioned)
+                            .with(Collidable {}, &mut collidable)
                             .build()
                     );
                 }
@@ -125,6 +129,30 @@ impl<'a> System<'a> for LevelGeneration {
                     }
                 }
                 
+                let monster_render = Render {
+                    glyph: 'm'.into(),
+                    foreground_color: Color::RED(),
+                    background_color: None,
+                    z_layer: ZLayer::Creature
+                }; 
+
+                for _ in 0..5 {
+                    if let Some(&monster_position) = random_in_vec_and_remove(&mut all_carved) {
+                        level.contents.push(
+                            entities
+                                .build_entity()
+                                .with(monster_position.clone(), &mut world_position)
+                                .with(monster_render.clone(), &mut render)
+                                .with(AIControlled::default(), &mut ai_controlled)
+                                .with(Movable::default(), &mut movable) 
+                                .with(Inventoried::default(), &mut inventoried)
+                                .with(Factioned { faction: Faction::Enemy }, &mut factioned)
+                                .with(Collidable {}, &mut collidable)
+                                .build()
+                        );
+                    }
+                }
+
             }
         }
     }

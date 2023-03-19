@@ -1,6 +1,6 @@
 use specs::prelude::*;
 
-use crate::game::{world::LastUserEvent, components::{movable::{Movable, Direction}, player_controlled::{PlayerControlled, PlayerCommand}}};
+use crate::game::{world::LastUserEvent, components::{movable::{Movable, Direction}, player_controlled::{PlayerControlled}}, common::Command};
 
 pub struct PlayerCommandHandler {}
 
@@ -11,16 +11,16 @@ impl<'a> System<'a> for PlayerCommandHandler {
         if let Some(user_event) = last_user_event.event.take() {
             for (_, movable) in (&player_controlled, &mut movable).join() {
                 match user_event {
-                    PlayerCommand::GoDown => {
+                    Command::GoDown => {
                         movable.unprocessed_move = Direction::Down.into()
                     },
-                    PlayerCommand::GoLeft => {
+                    Command::GoLeft => {
                         movable.unprocessed_move = Direction::Left.into()
                     },
-                    PlayerCommand::GoRight => {
+                    Command::GoRight => {
                         movable.unprocessed_move = Direction::Right.into()
                     },
-                    PlayerCommand::GoUp => {
+                    Command::GoUp => {
                         movable.unprocessed_move = Direction::Up.into()
                     }
                 }

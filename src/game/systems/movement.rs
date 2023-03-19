@@ -25,7 +25,9 @@ impl<'a> System<'a> for Movement {
             if let Some(direction) = movable.unprocessed_move.take() {
                 let new_world_position = world_position.moved(direction, world_parameters.width, world_parameters.height);
                 if !collidable_map.contains(&new_world_position) {
+                    collidable_map.remove(world_position);
                     *world_position = new_world_position;
+                    collidable_map.insert(new_world_position);
                 }
             }
         }

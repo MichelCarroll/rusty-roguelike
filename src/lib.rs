@@ -1,11 +1,11 @@
 mod game;
 
 use game::{
-    common::CanvasSize,
+    common::{CanvasSize, Command},
     components::{
-        player_controlled::{PlayerCommand, PlayerControlled}, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried,
+        player_controlled::PlayerControlled, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::Factioned, ai_controlled::AIControlled,
     },
-    systems::{rendering::Rendering, player_command_hander::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration, looting::Looting},
+    systems::{rendering::Rendering, player_command_handler::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration, looting::Looting, ai::AI},
     world::{LastUserEvent, WorldParameters},
 };
 use specs::prelude::*;
@@ -59,8 +59,8 @@ pub fn start() {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 
     let size = CanvasSize {
-        width: 2000.0,
-        height: 2000.0,
+        width: 1500.0,
+        height: 1500.0,
     };
     let canvas_handle = create_canvas(size, 2.0);
 
@@ -73,15 +73,18 @@ pub fn start() {
     world.register::<Collidable>(); 
     world.register::<Pickupable>(); 
     world.register::<Inventoried>(); 
+    world.register::<Factioned>(); 
+    world.register::<AIControlled>(); 
 
     world.insert(LastUserEvent::default());
-    world.insert(WorldParameters { width: 40, height: 40 });
+    world.insert(WorldParameters { width: 30, height: 30 });
 
     world.create_entity().with(Level::default()).build();
  
     let mut dispatcher = DispatcherBuilder::new()
         .with(LevelGeneration {}, "level-generation", &[])
         .with(PlayerCommandHandler {}, "player-command-handling", &["level-generation"])
+        .with(AI {}, "ai", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
         .with(Looting {}, "looting", &["movement"])
         .with(Rendering {
@@ -95,10 +98,10 @@ pub fn start() {
     let a = Closure::<dyn FnMut(_)>::new(move |e: web_sys::KeyboardEvent| {
         let mut last_user_event = world.write_resource::<LastUserEvent>();
         match e.key_code() {
-            37 => last_user_event.event = PlayerCommand::GoLeft.into(),
-            38 => last_user_event.event = PlayerCommand::GoUp.into(),
-            39 => last_user_event.event = PlayerCommand::GoRight.into(),
-            40 => last_user_event.event = PlayerCommand::GoDown.into(),
+            37 => last_user_event.event = Command::GoLeft.into(),
+            38 => last_user_event.event = Command::GoUp.into(),
+            39 => last_user_event.event = Command::GoRight.into(),
+            40 => last_user_event.event = Command::GoDown.into(),
             _ => (),
         };
         drop(last_user_event);

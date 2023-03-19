@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use specs::prelude::*;
 
-use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec}};
+use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable, pickupable::{Pickupable, self}, inventoried::Inventoried}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec, random_in_vec_and_remove}};
 
 pub struct LevelGeneration {}
 
@@ -15,10 +15,12 @@ impl<'a> System<'a> for LevelGeneration {
         WriteStorage<'a, Render>, 
         WriteStorage<'a, PlayerControlled>, 
         WriteStorage<'a, Movable>, 
-        WriteStorage<'a, Collidable>
+        WriteStorage<'a, Collidable>, 
+        WriteStorage<'a, Pickupable>, 
+        WriteStorage<'a, Inventoried>
     );
 
-    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable): Self::SystemData) {
+    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable, mut pickupable, mut inventoried): Self::SystemData) {
         for level in (&mut level).join() {
             if level.contents.is_empty() {
 
@@ -80,9 +82,9 @@ impl<'a> System<'a> for LevelGeneration {
                     }
                 }
 
-                let all_carved: Vec<_> = carved.iter().collect();
-                if let Some(&player_position) = random_in_vec(&all_carved) {
+                let mut all_carved: Vec<_> = carved.iter().collect();
 
+                if let Some(&player_position) = random_in_vec_and_remove(&mut all_carved) {
                     let character_render = Render {
                         glyph: '@'.into(),
                         foreground_color: Color::BLACK(),
@@ -97,8 +99,30 @@ impl<'a> System<'a> for LevelGeneration {
                             .with(character_render.clone(), &mut render)
                             .with(PlayerControlled::default(), &mut player_controlled)
                             .with(Movable::default(), &mut movable) 
+                            .with(Inventoried::default(), &mut inventoried)
                             .build()
                     );
+                }
+
+                let item_render = Render {
+                    glyph: '$'.into(),
+                    foreground_color: Color::YELLOW(),
+                    background_color: None,
+                    z_layer: ZLayer::Item
+                }; 
+
+                for _ in 0..10 {
+                    if let Some(&item_position) = random_in_vec_and_remove(&mut all_carved) {
+        
+                        level.contents.push(
+                            entities
+                                .build_entity()
+                                .with(item_position.clone(), &mut world_position)
+                                .with(item_render.clone(), &mut render)
+                                .with(Pickupable::default(), &mut pickupable) 
+                                .build()
+                        );
+                    }
                 }
                 
             }

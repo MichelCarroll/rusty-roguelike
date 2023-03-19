@@ -3,9 +3,9 @@ mod game;
 use game::{
     common::CanvasSize,
     components::{
-        player_controlled::{PlayerCommand, PlayerControlled}, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable,
+        player_controlled::{PlayerCommand, PlayerControlled}, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried,
     },
-    systems::{rendering::Rendering, player_command_hander::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration},
+    systems::{rendering::Rendering, player_command_hander::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration, looting::Looting},
     world::{LastUserEvent, WorldParameters},
 };
 use specs::prelude::*;
@@ -71,6 +71,8 @@ pub fn start() {
     world.register::<Render>();
     world.register::<Level>(); 
     world.register::<Collidable>(); 
+    world.register::<Pickupable>(); 
+    world.register::<Inventoried>(); 
 
     world.insert(LastUserEvent::default());
     world.insert(WorldParameters { width: 40, height: 40 });
@@ -81,6 +83,7 @@ pub fn start() {
         .with(LevelGeneration {}, "level-generation", &[])
         .with(PlayerCommandHandler {}, "player-command-handling", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
+        .with(Looting {}, "looting", &["movement"])
         .with(Rendering {
             canvas_size: size,
             rendering_context: canvas_handle.context,

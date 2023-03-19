@@ -4,3 +4,5 @@ pub mod rendered;
 pub mod world_position;
 pub mod level;
 pub mod collidable;
+pub mod pickupable;
+pub mod inventoried;

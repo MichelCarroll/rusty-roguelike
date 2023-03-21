@@ -10,7 +10,7 @@ pub fn random_in_range(x: u64, y: u64) -> u64 {
 
 pub fn random_index_vec<'a, T>(vector: &'a Vec<T>) -> Option<usize> {
     if vector.is_empty() {
-        return None 
+        return None;
     }
     let len = vector.len();
     let i = random_in_range(0, (len - 1) as u64);

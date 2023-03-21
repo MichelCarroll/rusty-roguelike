@@ -1,6 +1,5 @@
 use specs::{Component, NullStorage};
 
-
 #[derive(Default)]
 pub struct AIControlled;
 

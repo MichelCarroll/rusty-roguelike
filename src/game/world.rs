@@ -1,6 +1,5 @@
 use super::common::Command;
 
-
 #[derive(Default)]
 pub struct LastUserEvent {
     pub event: Option<Command>,
@@ -10,4 +9,4 @@ pub struct LastUserEvent {
 pub struct WorldParameters {
     pub width: u64,
     pub height: u64,
-} 
+}

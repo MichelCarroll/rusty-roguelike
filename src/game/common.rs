@@ -18,13 +18,32 @@ impl Color {
 }
 
 impl Color {
-    pub fn BROWN() -> Color { Color { rbg_code: "#B7999C".to_string() }}
-    pub fn BLACK() -> Color { Color { rbg_code: "#2D2D34".to_string() }}
-    pub fn MILDEW() -> Color { Color { rbg_code: "#8EAF9D".to_string() }}
-    pub fn YELLOW() -> Color { Color { rbg_code: "#F4D35E".to_string() }}
-    pub fn RED() -> Color { Color { rbg_code: "#EA3546".to_string() }}
+    pub fn BROWN() -> Color {
+        Color {
+            rbg_code: "#B7999C".to_string(),
+        }
+    }
+    pub fn BLACK() -> Color {
+        Color {
+            rbg_code: "#2D2D34".to_string(),
+        }
+    }
+    pub fn MILDEW() -> Color {
+        Color {
+            rbg_code: "#8EAF9D".to_string(),
+        }
+    }
+    pub fn YELLOW() -> Color {
+        Color {
+            rbg_code: "#F4D35E".to_string(),
+        }
+    }
+    pub fn RED() -> Color {
+        Color {
+            rbg_code: "#EA3546".to_string(),
+        }
+    }
 }
-
 
 #[derive(Debug)]
 pub enum Command {

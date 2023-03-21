@@ -1,15 +1,15 @@
 use log::info;
 use specs::prelude::*;
 
-use crate::game::{ components::{armed::{Armed}, damageable::Damageable}};
+use crate::game::components::{armed::Armed, damageable::Damageable};
 
 pub struct Combat {}
 
 impl<'a> System<'a> for Combat {
     type SystemData = (
-        Entities<'a>, 
-        WriteStorage<'a, Armed>, 
-        WriteStorage<'a, Damageable>
+        Entities<'a>,
+        WriteStorage<'a, Armed>,
+        WriteStorage<'a, Damageable>,
     );
 
     fn run(&mut self, (mut entities, mut armed, mut damageable): Self::SystemData) {
@@ -22,7 +22,6 @@ impl<'a> System<'a> for Combat {
                     }
                 }
             }
-        } 
+        }
     }
 }
-  

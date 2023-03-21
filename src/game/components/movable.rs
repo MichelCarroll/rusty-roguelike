@@ -12,7 +12,12 @@ pub enum Direction {
 
 impl Direction {
     pub fn random() -> Direction {
-        let directions = vec![Direction::Right, Direction::Left, Direction::Up, Direction::Down];
+        let directions = vec![
+            Direction::Right,
+            Direction::Left,
+            Direction::Up,
+            Direction::Down,
+        ];
         random_in_vec(&directions).unwrap().clone()
     }
 }
@@ -25,4 +30,3 @@ pub struct Movable {
 impl Component for Movable {
     type Storage = VecStorage<Self>;
 }
- 

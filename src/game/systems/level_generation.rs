@@ -2,46 +2,82 @@ use std::collections::HashSet;
 
 use specs::prelude::*;
 
-use crate::game::{ components::{movable::{Movable, Direction}, world_position::WorldPosition, level::Level, rendered::{Render, ZLayer}, player_controlled::PlayerControlled, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::{Factioned, Faction}, ai_controlled::AIControlled, damageable::{Damageable, self}, armed::Armed}, common::Color, world::WorldParameters, random::{random_in_range, random_in_vec, random_in_vec_and_remove}};
+use crate::game::{
+    common::Color,
+    components::{
+        ai_controlled::AIControlled,
+        armed::Armed,
+        collidable::Collidable,
+        damageable::{self, Damageable},
+        factioned::{Faction, Factioned},
+        inventoried::Inventoried,
+        level::Level,
+        movable::{Direction, Movable},
+        pickupable::Pickupable,
+        player_controlled::PlayerControlled,
+        rendered::{Render, ZLayer},
+        world_position::WorldPosition, sighted::Sighted,
+    },
+    random::{random_in_range, random_in_vec, random_in_vec_and_remove},
+    world::WorldParameters,
+};
 
 pub struct LevelGeneration {}
 
 impl<'a> System<'a> for LevelGeneration {
     type SystemData = (
-        Entities<'a>, 
+        Entities<'a>,
         Read<'a, WorldParameters>,
-        WriteStorage<'a, Level>, 
+        WriteStorage<'a, Level>,
         WriteStorage<'a, WorldPosition>,
-        WriteStorage<'a, Render>, 
-        WriteStorage<'a, PlayerControlled>, 
-        WriteStorage<'a, Movable>, 
-        WriteStorage<'a, Collidable>, 
-        WriteStorage<'a, Pickupable>, 
-        WriteStorage<'a, Inventoried>, 
+        WriteStorage<'a, Render>,
+        WriteStorage<'a, PlayerControlled>,
+        WriteStorage<'a, Movable>,
+        WriteStorage<'a, Collidable>,
+        WriteStorage<'a, Pickupable>,
+        WriteStorage<'a, Inventoried>,
         WriteStorage<'a, Factioned>,
         WriteStorage<'a, AIControlled>,
         WriteStorage<'a, Damageable>,
-        WriteStorage<'a, Armed>
+        WriteStorage<'a, Armed>,
+        WriteStorage<'a, Sighted>,
     );
 
-    fn run(&mut self, (entities, world_parameters, mut level, mut world_position, mut render, mut player_controlled, mut movable, mut collidable, mut pickupable, mut inventoried, mut factioned, mut ai_controlled, mut damageable, mut armed): Self::SystemData) {
+    fn run(
+        &mut self,
+        (
+            entities,
+            world_parameters,
+            mut level,
+            mut world_position,
+            mut render,
+            mut player_controlled,
+            mut movable,
+            mut collidable,
+            mut pickupable,
+            mut inventoried,
+            mut factioned,
+            mut ai_controlled,
+            mut damageable,
+            mut armed,
+            mut sighted,
+        ): Self::SystemData,
+    ) {
         for level in (&mut level).join() {
             if level.contents.is_empty() {
-
                 let floor_render = Render {
                     glyph: '.'.into(),
                     foreground_color: Color::MILDEW(),
                     background_color: Color::BROWN().into(),
-                    z_layer: ZLayer::Ground
+                    z_layer: ZLayer::Ground,
                 };
 
-                let stone_render = Render {  
+                let stone_render = Render {
                     glyph: '#'.into(),
                     foreground_color: Color::BROWN(),
                     background_color: Color::BLACK().into(),
-                    z_layer: ZLayer::Saturating
+                    z_layer: ZLayer::Saturating,
                 };
-
 
                 let mut automata: Vec<WorldPosition> = vec![];
                 let mut carved = HashSet::<WorldPosition>::new();
@@ -56,8 +92,12 @@ impl<'a> System<'a> for LevelGeneration {
 
                 for _ in 0..1000 {
                     for pos in automata.iter_mut() {
-                        *pos = pos.moved(Direction::random(), world_parameters.width, world_parameters.height);
-                        carved.insert(*pos); 
+                        *pos = pos.moved(
+                            Direction::random(),
+                            world_parameters.width,
+                            world_parameters.height,
+                        );
+                        carved.insert(*pos);
                     }
                 }
 
@@ -70,17 +110,16 @@ impl<'a> System<'a> for LevelGeneration {
                                     .build_entity()
                                     .with(WorldPosition { x, y }, &mut world_position)
                                     .with(floor_render.clone(), &mut render)
-                                    .build()
+                                    .build(),
                             )
-                        }
-                        else {
+                        } else {
                             level.contents.push(
                                 entities
                                     .build_entity()
                                     .with(WorldPosition { x, y }, &mut world_position)
                                     .with(stone_render.clone(), &mut render)
                                     .with(Collidable {}, &mut collidable)
-                                    .build()
+                                    .build(),
                             )
                         }
                     }
@@ -93,22 +132,34 @@ impl<'a> System<'a> for LevelGeneration {
                         glyph: '@'.into(),
                         foreground_color: Color::BLACK(),
                         background_color: None,
-                        z_layer: ZLayer::Creature
-                    }; 
-    
+                        z_layer: ZLayer::Creature,
+                    };
+
                     level.contents.push(
                         entities
                             .build_entity()
                             .with(player_position.clone(), &mut world_position)
                             .with(character_render.clone(), &mut render)
                             .with(PlayerControlled::default(), &mut player_controlled)
-                            .with(Movable::default(), &mut movable) 
+                            .with(Movable::default(), &mut movable)
                             .with(Inventoried::default(), &mut inventoried)
-                            .with(Factioned { faction: Faction::Player }, &mut factioned)
+                            .with(
+                                Factioned {
+                                    faction: Faction::Player,
+                                },
+                                &mut factioned,
+                            )
                             .with(Collidable {}, &mut collidable)
                             .with(Damageable { health: 100 }, &mut damageable)
-                            .with(Armed { damage: 5, targetting: None }, &mut armed)
-                            .build()
+                            .with(
+                                Armed {
+                                    damage: 5,
+                                    targetting: None,
+                                },
+                                &mut armed,
+                            )
+                            .with(Sighted::default(), &mut sighted)
+                            .build(),
                     );
                 }
 
@@ -116,29 +167,28 @@ impl<'a> System<'a> for LevelGeneration {
                     glyph: '$'.into(),
                     foreground_color: Color::YELLOW(),
                     background_color: None,
-                    z_layer: ZLayer::Item
-                }; 
+                    z_layer: ZLayer::Item,
+                };
 
                 for _ in 0..10 {
                     if let Some(&item_position) = random_in_vec_and_remove(&mut all_carved) {
-        
                         level.contents.push(
                             entities
                                 .build_entity()
                                 .with(item_position.clone(), &mut world_position)
                                 .with(item_render.clone(), &mut render)
-                                .with(Pickupable::default(), &mut pickupable) 
-                                .build()
+                                .with(Pickupable::default(), &mut pickupable)
+                                .build(),
                         );
                     }
                 }
-                
+
                 let monster_render = Render {
                     glyph: 'm'.into(),
                     foreground_color: Color::RED(),
                     background_color: None,
-                    z_layer: ZLayer::Creature
-                }; 
+                    z_layer: ZLayer::Creature,
+                };
 
                 for _ in 0..5 {
                     if let Some(&monster_position) = random_in_vec_and_remove(&mut all_carved) {
@@ -148,17 +198,27 @@ impl<'a> System<'a> for LevelGeneration {
                                 .with(monster_position.clone(), &mut world_position)
                                 .with(monster_render.clone(), &mut render)
                                 .with(AIControlled::default(), &mut ai_controlled)
-                                .with(Movable::default(), &mut movable) 
+                                .with(Movable::default(), &mut movable)
                                 .with(Inventoried::default(), &mut inventoried)
-                                .with(Factioned { faction: Faction::Enemy }, &mut factioned)
+                                .with(
+                                    Factioned {
+                                        faction: Faction::Enemy,
+                                    },
+                                    &mut factioned,
+                                )
                                 .with(Collidable {}, &mut collidable)
                                 .with(Damageable { health: 10 }, &mut damageable)
-                                .with(Armed { damage: 1, targetting: None }, &mut armed)
-                                .build()
+                                .with(
+                                    Armed {
+                                        damage: 1,
+                                        targetting: None,
+                                    },
+                                    &mut armed,
+                                )
+                                .build(),
                         );
                     }
                 }
-
             }
         }
     }

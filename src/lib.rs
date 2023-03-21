@@ -3,9 +3,15 @@ mod game;
 use game::{
     common::{CanvasSize, Command},
     components::{
-        player_controlled::PlayerControlled, rendered::Render, world_position::WorldPosition, movable::Movable, level::Level, collidable::Collidable, pickupable::Pickupable, inventoried::Inventoried, factioned::Factioned, ai_controlled::AIControlled, damageable::Damageable, armed::Armed,
+        ai_controlled::AIControlled, armed::Armed, collidable::Collidable, damageable::Damageable,
+        factioned::Factioned, inventoried::Inventoried, level::Level, movable::Movable,
+        pickupable::Pickupable, player_controlled::PlayerControlled, rendered::Render,
+        sighted::Sighted, world_position::WorldPosition,
     },
-    systems::{rendering::Rendering, player_command_handler::PlayerCommandHandler, movement::Movement, level_generation::LevelGeneration, looting::Looting, ai::AI, combat::Combat},
+    systems::{
+        ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
+        movement::Movement, player_command_handler::PlayerCommandHandler, rendering::Rendering, perspective::Perspective,
+    },
     world::{LastUserEvent, WorldParameters},
 };
 use specs::prelude::*;
@@ -34,7 +40,10 @@ fn create_canvas(size: CanvasSize, resolution_factor: f64) -> CanvasHandle {
         .unwrap();
 
     let style = document.create_element("style").unwrap();
-    let style_content = format!("canvas {{ width: {:?}px; height: {:?}px; }}", size.width as u32, size.height as u32);
+    let style_content = format!(
+        "canvas {{ width: {:?}px; height: {:?}px; }}",
+        size.width as u32, size.height as u32
+    );
     style.set_text_content(Some(&style_content));
     document.body().unwrap().append_child(&style).unwrap();
     document.body().unwrap().append_child(&canvas).unwrap();
@@ -48,7 +57,6 @@ fn create_canvas(size: CanvasSize, resolution_factor: f64) -> CanvasHandle {
         .unwrap()
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
-
 
     CanvasHandle { context }
 }
@@ -69,31 +77,44 @@ pub fn start() {
     world.register::<PlayerControlled>();
     world.register::<Movable>();
     world.register::<Render>();
-    world.register::<Level>(); 
-    world.register::<Collidable>(); 
-    world.register::<Pickupable>(); 
-    world.register::<Inventoried>(); 
-    world.register::<Factioned>(); 
-    world.register::<AIControlled>(); 
-    world.register::<Damageable>(); 
-    world.register::<Armed>(); 
+    world.register::<Level>();
+    world.register::<Collidable>();
+    world.register::<Pickupable>();
+    world.register::<Inventoried>();
+    world.register::<Factioned>();
+    world.register::<AIControlled>();
+    world.register::<Damageable>();
+    world.register::<Armed>();
+    world.register::<Sighted>();
 
     world.insert(LastUserEvent::default());
-    world.insert(WorldParameters { width: 30, height: 30 });
+    world.insert(WorldParameters {
+        width: 30,
+        height: 30,
+    });
 
     world.create_entity().with(Level::default()).build();
- 
+
     let mut dispatcher = DispatcherBuilder::new()
         .with(LevelGeneration {}, "level-generation", &[])
-        .with(PlayerCommandHandler {}, "player-command-handling", &["level-generation"])
+        .with(
+            PlayerCommandHandler {},
+            "player-command-handling",
+            &["level-generation"],
+        )
         .with(AI {}, "ai", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
         .with(Combat {}, "combat", &["movement"])
         .with(Looting {}, "looting", &["movement"])
-        .with(Rendering {
-            canvas_size: size,
-            rendering_context: canvas_handle.context,
-        }, "rendering", &["movement", "combat", "looting"])
+        .with(Perspective {}, "perspective", &["movement", "combat", "looting"])
+        .with(
+            Rendering {
+                canvas_size: size,
+                rendering_context: canvas_handle.context,
+            },
+            "rendering",
+            &["perspective"],
+        )
         .build();
 
     dispatcher.dispatch(&mut world);

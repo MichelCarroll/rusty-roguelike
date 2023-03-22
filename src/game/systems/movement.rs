@@ -59,7 +59,6 @@ impl<'a> System<'a> for Movement {
                     match (armed, damageable.get(collided_with.clone())) {
                         (Some(armed), Some(_)) => {
                             armed.targetting = collided_with.clone().into();
-                            info!("Targeting something?");
                         }
                         _ => {}
                     }

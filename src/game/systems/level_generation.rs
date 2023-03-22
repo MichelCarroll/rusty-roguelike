@@ -153,7 +153,7 @@ impl<'a> System<'a> for LevelGeneration {
                                 &mut factioned,
                             )
                             .with(Collidable {}, &mut collidable)
-                            .with(Damageable { health: 100 }, &mut damageable)
+                            .with(Damageable { health: 100, max_health: 100 }, &mut damageable)
                             .with(
                                 Armed {
                                     damage: 5,
@@ -188,7 +188,7 @@ impl<'a> System<'a> for LevelGeneration {
 
                 let monster_render = Render {
                     glyph: 'm'.into(),
-                    foreground_color: Color::RED(),
+                    foreground_color: Color::DEEP_RED(),
                     background_color: None,
                     z_layer: ZLayer::Creature,
                 };
@@ -210,7 +210,7 @@ impl<'a> System<'a> for LevelGeneration {
                                     &mut factioned,
                                 )
                                 .with(Collidable {}, &mut collidable)
-                                .with(Damageable { health: 10 }, &mut damageable)
+                                .with(Damageable { health: 10, max_health: 10 }, &mut damageable)
                                 .with(
                                     Armed {
                                         damage: 1,

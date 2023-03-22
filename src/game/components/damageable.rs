@@ -3,6 +3,7 @@ use specs::{Component, HashMapStorage};
 #[derive(Default)]
 pub struct Damageable {
     pub health: u32,
+    pub max_health: u32,
 }
 
 impl Component for Damageable {

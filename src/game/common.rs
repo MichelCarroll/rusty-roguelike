@@ -38,9 +38,14 @@ impl Color {
             r: 246, g: 174, b: 45
         }
     }
-    pub fn RED() -> Color {
+    pub fn DEEP_RED() -> Color {
         Color {
             r: 107, g: 39, b: 55
+        }
+    }
+    pub fn BRIGHT_RED() -> Color {
+        Color {
+            r: 220, g: 20, b: 20
         }
     }
 

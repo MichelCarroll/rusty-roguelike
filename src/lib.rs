@@ -6,7 +6,7 @@ use game::{
         ai_controlled::AIControlled, armed::Armed, collidable::Collidable, damageable::Damageable,
         factioned::Factioned, inventoried::Inventoried, level::Level, movable::Movable,
         pickupable::Pickupable, player_controlled::PlayerControlled, rendered::Render,
-        sighted::Sighted, 
+        sighted::Sighted, opaque::Opaque, 
     },
     systems::{
         ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
@@ -86,6 +86,7 @@ pub fn start() {
     world.register::<Damageable>();
     world.register::<Armed>();
     world.register::<Sighted>();
+    world.register::<Opaque>();
 
     world.insert(LastUserEvent::default());
     world.insert(WorldParameters {

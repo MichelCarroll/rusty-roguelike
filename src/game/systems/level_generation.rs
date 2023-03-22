@@ -16,7 +16,7 @@ use crate::game::{
         pickupable::Pickupable,
         player_controlled::PlayerControlled,
         rendered::{Render, ZLayer},
-        sighted::Sighted,
+        sighted::Sighted, opaque::Opaque,
     },
     random::{random_in_range, random_in_vec, random_in_vec_and_remove},
     world::{WorldParameters, WorldPosition},
@@ -41,6 +41,7 @@ impl<'a> System<'a> for LevelGeneration {
         WriteStorage<'a, Damageable>,
         WriteStorage<'a, Armed>,
         WriteStorage<'a, Sighted>,
+        WriteStorage<'a, Opaque>,
     );
 
     fn run(
@@ -61,6 +62,7 @@ impl<'a> System<'a> for LevelGeneration {
             mut damageable,
             mut armed,
             mut sighted,
+            mut opaque
         ): Self::SystemData,
     ) {
         for level in (&mut level).join() {
@@ -119,6 +121,7 @@ impl<'a> System<'a> for LevelGeneration {
                                     .with(WorldPosition { x, y }, &mut world_position)
                                     .with(stone_render.clone(), &mut render)
                                     .with(Collidable {}, &mut collidable)
+                                    .with(Opaque::default(), &mut opaque)
                                     .build(),
                             )
                         }

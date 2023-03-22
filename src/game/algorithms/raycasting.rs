@@ -49,7 +49,7 @@ impl Iterator for Raycast {
 
             match (self.current_world_position.x as i32).checked_add(self.steps.x) {
                 Some(new_position) => {
-                    if new_position > (self.max_position.x as i32) {
+                    if new_position > (self.max_position.x as i32) || new_position < 0{
                         None 
                     }
                     else {
@@ -67,7 +67,7 @@ impl Iterator for Raycast {
 
             match (self.current_world_position.y as i32).checked_add(self.steps.y) {
                 Some(new_position) => {
-                    if new_position > (self.max_position.y as i32) {
+                    if new_position > (self.max_position.y as i32) || new_position < 0 {
                         None 
                     }
                     else {

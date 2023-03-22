@@ -3,7 +3,7 @@ use std::{f64::consts::PI, collections::HashSet};
 use log::info;
 use specs::prelude::*;
 
-use crate::game::{components::{sighted::Sighted, opaque::Opaque}, world::{WorldPosition, WorldParameters}, algorithms::raycasting::Raycast};
+use crate::game::{components::{sighted::Sighted, opaque::Opaque, movable::Movable}, world::{WorldPosition, WorldParameters}, algorithms::raycasting::Raycast};
 
 pub struct Perspective {}
 
@@ -15,10 +15,11 @@ impl<'a> System<'a> for Perspective {
         Read<'a, WorldParameters>,
         ReadStorage<'a, WorldPosition>,
         ReadStorage<'a, Opaque>,
+        ReadStorage<'a, Movable>,
         WriteStorage<'a, Sighted>,
     );
 
-    fn run(&mut self, (entities, world_parameters, world_position, opaque, mut sighted): Self::SystemData) {
+    fn run(&mut self, (entities, world_parameters, world_position, opaque, movable, mut sighted): Self::SystemData) {
         for (sighted_world_position, sighted) in (&world_position, &mut sighted).join() {
             sighted.seen.clear();
 
@@ -47,9 +48,12 @@ impl<'a> System<'a> for Perspective {
                 radians += radian_delta;
             }
 
-            for (entity, seen_world_position) in (&entities, &world_position).join() {
+            for (entity, seen_world_position, movable) in (&entities, &world_position, (&movable).maybe()).join() {
                 if seen_positions.contains(seen_world_position) {
                     sighted.seen.add(entity.id());
+                    if movable.is_none() {
+                        sighted.seen_recently.add(entity.id());
+                    }
                 }
             }
         }

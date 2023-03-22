@@ -4,43 +4,49 @@ pub struct CanvasSize {
     pub height: f64,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Color {
-    pub rbg_code: String,
+    r: u8,
+    g: u8,
+    b: u8,
 }
 
-impl Color {
-    pub fn new(r: u8, g: u8, b: u8) -> Color {
-        Color {
-            rbg_code: format!("#{:02X?}{:02X?}{:02X?}", r, g, b),
-        }
+impl ToString for Color {
+    fn to_string(&self) -> String {
+        format!("#{:02X?}{:02X?}{:02X?}", self.r, self.g, self.b)
     }
 }
 
 impl Color {
     pub fn BROWN() -> Color {
         Color {
-            rbg_code: "#B7999C".to_string(),
+            r: 226, g: 132, b: 19
         }
     }
     pub fn BLACK() -> Color {
         Color {
-            rbg_code: "#2D2D34".to_string(),
+            r: 0, g: 0, b: 34
         }
     }
     pub fn MILDEW() -> Color {
         Color {
-            rbg_code: "#8EAF9D".to_string(),
+            r: 51, g: 101, b: 138
         }
     }
     pub fn YELLOW() -> Color {
         Color {
-            rbg_code: "#F4D35E".to_string(),
+            r: 246, g: 174, b: 45
         }
     }
     pub fn RED() -> Color {
         Color {
-            rbg_code: "#EA3546".to_string(),
+            r: 107, g: 39, b: 55
+        }
+    }
+
+    pub fn darkened(self) -> Color {
+        Color {
+            r: self.r / 2, g: self.g / 2, b: self.b / 2
         }
     }
 }

@@ -9,8 +9,7 @@ use crate::game::{
         ai_controlled::AIControlled,
         factioned::{Faction, Factioned},
         movable::{Direction, Movable},
-        world_position::WorldPosition,
-    },
+    }, world::WorldPosition,
 };
 
 pub struct AI {}
@@ -40,18 +39,7 @@ impl<'a> System<'a> for AI {
                     let delta_x = (player_position.x as f64) - (world_position.x as f64);
                     let delta_y = (player_position.y as f64) - (world_position.y as f64);
                     let rads = (delta_y).atan2(delta_x);
-
-                    let new_direction = if rads >= -PI / 4.0 && rads < PI / 4.0 {
-                        Direction::Right
-                    } else if rads >= PI / 4.0 && rads < PI * 3.0 / 4.0 {
-                        Direction::Down
-                    } else if rads >= -PI * 3.0 / 4.0 && rads < -PI / 4.0 {
-                        Direction::Up
-                    } else {
-                        Direction::Left
-                    };
-
-                    movable.unprocessed_move = new_direction.into();
+                    movable.unprocessed_move = Direction::from_radians(rads).into();
                 }
             }
         }

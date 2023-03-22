@@ -1,7 +1,6 @@
-use log::info;
 use specs::prelude::*;
 
-use crate::game::components::{sighted::Sighted, world_position::WorldPosition};
+use crate::game::{components::{sighted::Sighted}, world::WorldPosition};
 
 pub struct Perspective {}
 

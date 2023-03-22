@@ -16,10 +16,10 @@ use crate::game::{
         pickupable::Pickupable,
         player_controlled::PlayerControlled,
         rendered::{Render, ZLayer},
-        world_position::WorldPosition, sighted::Sighted,
+        sighted::Sighted,
     },
     random::{random_in_range, random_in_vec, random_in_vec_and_remove},
-    world::WorldParameters,
+    world::{WorldParameters, WorldPosition},
 };
 
 pub struct LevelGeneration {}

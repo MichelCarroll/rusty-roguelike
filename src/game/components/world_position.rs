@@ -2,13 +2,9 @@ use std::cmp;
 
 use specs::{Component, VecStorage};
 
-use super::movable::Direction;
+use crate::game::world::WorldPosition;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct WorldPosition {
-    pub x: u64,
-    pub y: u64,
-}
+use super::movable::Direction;
 
 impl Component for WorldPosition {
     type Storage = VecStorage<Self>;

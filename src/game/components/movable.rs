@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use specs::{Component, VecStorage};
 
 use crate::game::random::random_in_vec;
@@ -19,6 +21,18 @@ impl Direction {
             Direction::Down,
         ];
         random_in_vec(&directions).unwrap().clone()
+    }
+
+    pub fn from_radians(rads: f64) -> Direction {
+        if rads >= -PI / 4.0 && rads < PI / 4.0 {
+            Direction::Right
+        } else if rads >= PI / 4.0 && rads < PI * 3.0 / 4.0 {
+            Direction::Down
+        } else if rads >= -PI * 3.0 / 4.0 && rads < -PI / 4.0 {
+            Direction::Up
+        } else {
+            Direction::Left
+        }
     }
 }
 

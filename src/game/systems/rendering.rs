@@ -7,8 +7,7 @@ use crate::game::{
     common::{CanvasSize, Color},
     components::{
         player_controlled::PlayerControlled, rendered::Render, sighted::Sighted,
-        world_position::WorldPosition,
-    },
+    }, world::WorldPosition,
 };
 
 const CELL_SIZE: f64 = 50.0;

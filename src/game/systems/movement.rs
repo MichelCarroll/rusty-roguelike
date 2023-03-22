@@ -6,9 +6,8 @@ use specs::prelude::*;
 use crate::game::{
     components::{
         armed::Armed, collidable::Collidable, damageable::Damageable, movable::Movable,
-        world_position::WorldPosition,
     },
-    world::WorldParameters,
+    world::{WorldParameters, WorldPosition},
 };
 
 pub struct Movement {}

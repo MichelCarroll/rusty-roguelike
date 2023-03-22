@@ -6,13 +6,13 @@ use game::{
         ai_controlled::AIControlled, armed::Armed, collidable::Collidable, damageable::Damageable,
         factioned::Factioned, inventoried::Inventoried, level::Level, movable::Movable,
         pickupable::Pickupable, player_controlled::PlayerControlled, rendered::Render,
-        sighted::Sighted, world_position::WorldPosition,
+        sighted::Sighted, 
     },
     systems::{
         ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
         movement::Movement, player_command_handler::PlayerCommandHandler, rendering::Rendering, perspective::Perspective,
     },
-    world::{LastUserEvent, WorldParameters},
+    world::{LastUserEvent, WorldParameters, WorldPosition},
 };
 use specs::prelude::*;
 use std::panic;

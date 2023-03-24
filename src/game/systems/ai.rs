@@ -1,18 +1,17 @@
-use std::f64::consts::PI;
-
-use log::info;
 use specs::prelude::*;
 
 use crate::game::{
-    common::Command,
     components::{
         ai_controlled::AIControlled,
         factioned::{Faction, Factioned},
         movable::{Direction, Movable},
-    }, world::WorldPosition,
+    }, world::{WorldPosition, WorldTime},
 };
 
-pub struct AI {}
+#[derive(Default)]
+pub struct AI {
+    pub last_tick: u64
+}
 
 impl<'a> System<'a> for AI {
     type SystemData = (
@@ -20,9 +19,14 @@ impl<'a> System<'a> for AI {
         ReadStorage<'a, Factioned>,
         ReadStorage<'a, WorldPosition>,
         WriteStorage<'a, Movable>,
+        Read<'a, WorldTime>
     );
 
-    fn run(&mut self, (ai_controlled, factioned, world_position, mut movable): Self::SystemData) {
+    fn run(&mut self, (ai_controlled, factioned, world_position, mut movable, world_time): Self::SystemData) {
+        if self.last_tick >= world_time.tick {
+            return 
+        }
+
         let first_player_position = (&factioned, &world_position)
             .join()
             .filter_map(|(factioned, world_position)| match factioned.faction {
@@ -43,5 +47,7 @@ impl<'a> System<'a> for AI {
                 }
             }
         }
+
+        self.last_tick = world_time.tick;
     }
 }

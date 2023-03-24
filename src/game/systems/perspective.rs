@@ -1,6 +1,5 @@
 use std::{f64::consts::PI, collections::HashSet};
 
-use log::info;
 use specs::prelude::*;
 
 use crate::game::{components::{sighted::Sighted, opaque::Opaque, movable::Movable}, world::{WorldPosition, WorldParameters}, algorithms::raycasting::Raycast};

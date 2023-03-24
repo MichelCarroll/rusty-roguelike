@@ -1,4 +1,3 @@
-use log::info;
 use specs::prelude::*;
 
 use crate::game::components::{armed::Armed, damageable::Damageable};
@@ -12,7 +11,7 @@ impl<'a> System<'a> for Combat {
         WriteStorage<'a, Damageable>,
     );
 
-    fn run(&mut self, (mut entities, mut armed, mut damageable): Self::SystemData) {
+    fn run(&mut self, (entities, mut armed, mut damageable): Self::SystemData) {
         for armed in (&mut armed).join() {
             if let Some(target) = armed.targetting.take() {
                 if let Some(damage) = damageable.get_mut(target) {

@@ -1,10 +1,10 @@
 use specs::{Component, VecStorage};
 
-use crate::game::common::Command;
+use crate::game::common::UIEvent;
 
 #[derive(Default)]
 pub struct PlayerControlled {
-    pub unprocessed_action: Option<Command>,
+    pub unprocessed_action: Option<UIEvent>,
 }
 
 impl Component for PlayerControlled {

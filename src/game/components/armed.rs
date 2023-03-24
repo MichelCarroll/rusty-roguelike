@@ -1,7 +1,5 @@
 use specs::{Component, Entity, HashMapStorage};
 
-use super::damageable::Damageable;
-
 #[derive(Default)]
 pub struct Armed {
     pub damage: u32,

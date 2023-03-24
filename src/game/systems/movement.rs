@@ -1,6 +1,5 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
-use log::info;
 use specs::prelude::*;
 
 use crate::game::{

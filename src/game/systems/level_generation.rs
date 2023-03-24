@@ -8,7 +8,7 @@ use crate::game::{
         ai_controlled::AIControlled,
         armed::Armed,
         collidable::Collidable,
-        damageable::{self, Damageable},
+        damageable::{Damageable},
         factioned::{Faction, Factioned},
         inventoried::Inventoried,
         level::Level,
@@ -18,7 +18,7 @@ use crate::game::{
         rendered::{Render, ZLayer},
         sighted::Sighted, opaque::Opaque,
     },
-    random::{random_in_range, random_in_vec, random_in_vec_and_remove},
+    random::{random_in_range, random_in_vec_and_remove},
     world::{WorldParameters, WorldPosition},
 };
 
@@ -69,15 +69,15 @@ impl<'a> System<'a> for LevelGeneration {
             if level.contents.is_empty() {
                 let floor_render = Render {
                     glyph: '.'.into(),
-                    foreground_color: Color::MILDEW(),
-                    background_color: Color::BROWN().into(),
+                    foreground_color: Color::mildew(),
+                    background_color: Color::brown().into(),
                     z_layer: ZLayer::Ground,
                 };
 
                 let stone_render = Render {
                     glyph: '#'.into(),
-                    foreground_color: Color::BROWN(),
-                    background_color: Color::BLACK().into(),
+                    foreground_color: Color::brown(),
+                    background_color: Color::black().into(),
                     z_layer: ZLayer::Saturating,
                 };
 
@@ -133,7 +133,7 @@ impl<'a> System<'a> for LevelGeneration {
                 if let Some(&player_position) = random_in_vec_and_remove(&mut all_carved) {
                     let character_render = Render {
                         glyph: '@'.into(),
-                        foreground_color: Color::BLACK(),
+                        foreground_color: Color::black(),
                         background_color: None,
                         z_layer: ZLayer::Creature,
                     };
@@ -168,7 +168,7 @@ impl<'a> System<'a> for LevelGeneration {
 
                 let item_render = Render {
                     glyph: '$'.into(),
-                    foreground_color: Color::YELLOW(),
+                    foreground_color: Color::yellow(),
                     background_color: None,
                     z_layer: ZLayer::Item,
                 };
@@ -188,7 +188,7 @@ impl<'a> System<'a> for LevelGeneration {
 
                 let monster_render = Render {
                     glyph: 'm'.into(),
-                    foreground_color: Color::DEEP_RED(),
+                    foreground_color: Color::deep_red(),
                     background_color: None,
                     z_layer: ZLayer::Creature,
                 };

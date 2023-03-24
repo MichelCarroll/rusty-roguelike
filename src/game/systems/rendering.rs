@@ -4,10 +4,10 @@ use specs::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
 use crate::game::{
-    common::{CanvasSize, Color},
+    common::{CanvasSize, Color, CanvasPosition},
     components::{
         player_controlled::PlayerControlled, rendered::Render, sighted::Sighted, damageable::Damageable,
-    }, world::WorldPosition,
+    }, world::{WorldPosition, UIState},
 };
 
 const CELL_SIZE: f64 = 50.0;
@@ -15,7 +15,7 @@ const BACKGROUND_COLOR: &str = "#000000";
 
 pub struct Rendering {
     pub canvas_size: CanvasSize,
-    pub rendering_context: CanvasRenderingContext2d,
+    pub rendering_context: CanvasRenderingContext2d
 }
 
 struct RenderTarget<'a> {
@@ -62,10 +62,11 @@ impl<'a> System<'a> for Rendering {
         ReadStorage<'a, PlayerControlled>,
         ReadStorage<'a, Sighted>,
         ReadStorage<'a, Damageable>,
+        Read<'a, UIState>
     );
     
 
-    fn run(&mut self, (pos, render, player_controlled, sighted, damageable): Self::SystemData) {
+    fn run(&mut self, (pos, render, player_controlled, sighted, damageable, ui_state): Self::SystemData) {
         let x_text_offset = CELL_SIZE / 2.0;
         let y_text_offset = CELL_SIZE / 2.0;
         self.rendering_context.set_font("bold 44px Arial");
@@ -82,7 +83,7 @@ impl<'a> System<'a> for Rendering {
             .first()
         {
             let mut renderable = (&pos, &render, (&damageable).maybe(), &sighted.seen).join().collect::<Vec<_>>();
-            let mut semi_renderable = (&pos, &render, !&sighted.seen, &sighted.seen_recently).join().collect::<Vec<_>>();
+            let semi_renderable = (&pos, &render, !&sighted.seen, &sighted.seen_recently).join().collect::<Vec<_>>();
             renderable.sort_by(|a, b| a.1.z_layer.cmp(&b.1.z_layer));
 
             let mut hash_map: HashMap<WorldPosition, RenderTarget> = HashMap::new();
@@ -99,9 +100,21 @@ impl<'a> System<'a> for Rendering {
                 let x = CELL_SIZE * pos.x as f64;
                 let y = CELL_SIZE * pos.y as f64;
 
+                let hovered = match ui_state.mouse_over {
+                    Some(CanvasPosition { x: mouse_x, y: mouse_y }) => {
+                        let mouse_x = mouse_x as f64;
+                        let mouse_y = mouse_y as f64;
+                        mouse_x > x && mouse_x < x + CELL_SIZE && mouse_y > y && mouse_y < y + CELL_SIZE
+                    },
+                    None => false,
+                };
+
                 if let Some(background_color) = &render_target.background_color {
                     let mut color = *background_color;
-                    if render_target.semi_renderable { 
+                    if hovered {
+                        color = color.tinted();
+                    }
+                    else if render_target.semi_renderable { 
                         color = color.darkened();
                     }
                     self.rendering_context
@@ -111,7 +124,10 @@ impl<'a> System<'a> for Rendering {
 
                 if let Some((glyph, foreground_color)) = render_target.glyph {
                     let mut color = foreground_color;
-                    if render_target.semi_renderable { 
+                    if hovered {
+                        color = color.tinted();
+                    }
+                    else if render_target.semi_renderable { 
                         color = color.darkened();
                     }
                     self.rendering_context
@@ -124,9 +140,9 @@ impl<'a> System<'a> for Rendering {
                 if let Some(damageable) = render_target.damageable {
                     if damageable.max_health != damageable.health {
                         self.rendering_context
-                            .set_stroke_style(&(Color::BLACK().to_string().into()));
+                            .set_stroke_style(&(Color::black().to_string().into()));
                         self.rendering_context
-                            .set_fill_style(&(Color::BRIGHT_RED().to_string().into()));
+                            .set_fill_style(&(Color::bright_red().to_string().into()));
                         let fill_width = CELL_SIZE * (damageable.health as f64 / damageable.max_health as f64);
                         let health_bar_height = CELL_SIZE / 6.0;
                         let bar_y = y + CELL_SIZE - health_bar_height;

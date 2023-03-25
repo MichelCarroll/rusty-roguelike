@@ -5,12 +5,13 @@ use crate::game::{
         ai_controlled::AIControlled,
         factioned::{Faction, Factioned},
         movable::{Direction, Movable},
-    }, world::{WorldPosition, WorldTime},
+    },
+    world::{WorldPosition, WorldTime},
 };
 
 #[derive(Default)]
 pub struct AI {
-    pub last_tick: u64
+    pub last_tick: u64,
 }
 
 impl<'a> System<'a> for AI {
@@ -19,12 +20,15 @@ impl<'a> System<'a> for AI {
         ReadStorage<'a, Factioned>,
         ReadStorage<'a, WorldPosition>,
         WriteStorage<'a, Movable>,
-        Read<'a, WorldTime>
+        Read<'a, WorldTime>,
     );
 
-    fn run(&mut self, (ai_controlled, factioned, world_position, mut movable, world_time): Self::SystemData) {
+    fn run(
+        &mut self,
+        (ai_controlled, factioned, world_position, mut movable, world_time): Self::SystemData,
+    ) {
         if self.last_tick >= world_time.tick {
-            return 
+            return;
         }
 
         let first_player_position = (&factioned, &world_position)

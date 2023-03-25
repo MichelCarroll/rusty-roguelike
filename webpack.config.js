@@ -9,8 +9,16 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'index.js',
     },
+    module: {
+      rules: [
+        { test: /\.html$/, loader: 'html-loader' }
+      ]
+    },
     plugins: [
-        new HtmlWebpackPlugin(),
+        new HtmlWebpackPlugin({
+          filename: 'index.html',
+          template: 'static/template.html'
+        }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, ".")
         }),

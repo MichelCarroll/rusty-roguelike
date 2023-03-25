@@ -1,17 +1,18 @@
 use std::collections::HashMap;
 
-use log::info;
 use specs::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
 use crate::game::{
-    common::{CanvasSize, Color, CanvasPosition},
+    common::{CanvasPosition, CanvasSize, Color},
     components::{
-        player_controlled::PlayerControlled, rendered::Render, sighted::Sighted, damageable::Damageable,
-    }, world::{WorldPosition, UIState, WorldTime},
+        damageable::Damageable, player_controlled::PlayerControlled, rendered::Render,
+        sighted::Sighted,
+    },
+    world::CELL_SIZE,
+    world::{UIState, WorldPosition},
 };
 
-const CELL_SIZE: f64 = 50.0;
 const BACKGROUND_COLOR: &str = "#000000";
 
 pub struct Rendering {
@@ -23,15 +24,20 @@ struct RenderTarget<'a> {
     glyph: Option<(char, Color)>,
     background_color: Option<Color>,
     damageable: Option<&'a Damageable>,
-    semi_renderable: bool
+    semi_renderable: bool,
 }
 
 // Safe because wasm is always strictly single-threaded
 unsafe impl Send for Rendering {}
 
 impl Rendering {
-
-    fn add_to_render_targets<'a>(hash_map: &mut HashMap<WorldPosition, RenderTarget<'a>>, render: &Render, pos: &WorldPosition, damageable: Option<&'a Damageable>, semi_renderable: bool) {
+    fn add_to_render_targets<'a>(
+        hash_map: &mut HashMap<WorldPosition, RenderTarget<'a>>,
+        render: &Render,
+        pos: &WorldPosition,
+        damageable: Option<&'a Damageable>,
+        semi_renderable: bool,
+    ) {
         let new_glyph = render.glyph.map(|g| (g, render.foreground_color.clone()));
         if let Some(render_target) = hash_map.get_mut(pos) {
             if let Some(new_glyph) = new_glyph {
@@ -49,7 +55,7 @@ impl Rendering {
                     glyph: new_glyph,
                     background_color: render.background_color.clone(),
                     damageable,
-                    semi_renderable
+                    semi_renderable,
                 },
             );
         }
@@ -63,12 +69,13 @@ impl<'a> System<'a> for Rendering {
         ReadStorage<'a, PlayerControlled>,
         ReadStorage<'a, Sighted>,
         ReadStorage<'a, Damageable>,
-        Write<'a, UIState>
+        Read<'a, UIState>,
     );
-    
 
-    fn run(&mut self, (pos, render, player_controlled, sighted, damageable, mut ui_state): Self::SystemData) {
-
+    fn run(
+        &mut self,
+        (pos, render, player_controlled, sighted, damageable, ui_state): Self::SystemData,
+    ) {
         let x_text_offset = CELL_SIZE / 2.0;
         let y_text_offset = CELL_SIZE / 2.0;
         self.rendering_context.set_font("bold 44px Arial");
@@ -84,8 +91,12 @@ impl<'a> System<'a> for Rendering {
             .collect::<Vec<_>>()
             .first()
         {
-            let mut renderable = (&pos, &render, (&damageable).maybe(), &sighted.seen).join().collect::<Vec<_>>();
-            let semi_renderable = (&pos, &render, !&sighted.seen, &sighted.seen_recently).join().collect::<Vec<_>>();
+            let mut renderable = (&pos, &render, (&damageable).maybe(), &sighted.seen)
+                .join()
+                .collect::<Vec<_>>();
+            let semi_renderable = (&pos, &render, !&sighted.seen, &sighted.seen_recently)
+                .join()
+                .collect::<Vec<_>>();
             renderable.sort_by(|a, b| a.1.z_layer.cmp(&b.1.z_layer));
 
             let mut hash_map: HashMap<WorldPosition, RenderTarget> = HashMap::new();
@@ -103,11 +114,17 @@ impl<'a> System<'a> for Rendering {
                 let y = CELL_SIZE * pos.y as f64;
 
                 let hovered = match ui_state.mouse_over {
-                    Some(CanvasPosition { x: mouse_x, y: mouse_y }) => {
+                    Some(CanvasPosition {
+                        x: mouse_x,
+                        y: mouse_y,
+                    }) => {
                         let mouse_x = mouse_x as f64;
                         let mouse_y = mouse_y as f64;
-                        mouse_x > x && mouse_x < x + CELL_SIZE && mouse_y > y && mouse_y < y + CELL_SIZE
-                    },
+                        mouse_x > x
+                            && mouse_x < x + CELL_SIZE
+                            && mouse_y > y
+                            && mouse_y < y + CELL_SIZE
+                    }
                     None => false,
                 };
 
@@ -115,8 +132,7 @@ impl<'a> System<'a> for Rendering {
                     let mut color = *background_color;
                     if hovered {
                         color = color.tinted();
-                    }
-                    else if render_target.semi_renderable { 
+                    } else if render_target.semi_renderable {
                         color = color.darkened();
                     }
                     self.rendering_context
@@ -128,8 +144,7 @@ impl<'a> System<'a> for Rendering {
                     let mut color = foreground_color;
                     if hovered {
                         color = color.tinted();
-                    }
-                    else if render_target.semi_renderable { 
+                    } else if render_target.semi_renderable {
                         color = color.darkened();
                     }
                     self.rendering_context
@@ -145,11 +160,14 @@ impl<'a> System<'a> for Rendering {
                             .set_stroke_style(&(Color::black().to_string().into()));
                         self.rendering_context
                             .set_fill_style(&(Color::bright_red().to_string().into()));
-                        let fill_width = CELL_SIZE * (damageable.health as f64 / damageable.max_health as f64);
+                        let fill_width =
+                            CELL_SIZE * (damageable.health as f64 / damageable.max_health as f64);
                         let health_bar_height = CELL_SIZE / 6.0;
                         let bar_y = y + CELL_SIZE - health_bar_height;
-                        self.rendering_context.stroke_rect(x, bar_y, CELL_SIZE, health_bar_height);
-                        self.rendering_context.fill_rect(x, bar_y, fill_width, health_bar_height);
+                        self.rendering_context
+                            .stroke_rect(x, bar_y, CELL_SIZE, health_bar_height);
+                        self.rendering_context
+                            .fill_rect(x, bar_y, fill_width, health_bar_height);
                     }
                 }
             }

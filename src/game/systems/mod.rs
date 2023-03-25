@@ -6,3 +6,4 @@ pub mod movement;
 pub mod perspective;
 pub mod player_command_handler;
 pub mod rendering;
+pub mod ui;

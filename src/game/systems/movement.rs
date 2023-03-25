@@ -1,11 +1,9 @@
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 use specs::prelude::*;
 
 use crate::game::{
-    components::{
-        armed::Armed, collidable::Collidable, damageable::Damageable, movable::Movable,
-    },
+    components::{armed::Armed, collidable::Collidable, damageable::Damageable, movable::Movable},
     world::{WorldParameters, WorldPosition},
 };
 

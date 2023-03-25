@@ -1,8 +1,12 @@
-use std::{f64::consts::PI, collections::HashSet};
+use std::{collections::HashSet, f64::consts::PI};
 
 use specs::prelude::*;
 
-use crate::game::{components::{sighted::Sighted, opaque::Opaque, movable::Movable}, world::{WorldPosition, WorldParameters}, algorithms::raycasting::Raycast};
+use crate::game::{
+    algorithms::raycasting::Raycast,
+    components::{movable::Movable, opaque::Opaque, sighted::Sighted},
+    world::{WorldParameters, WorldPosition},
+};
 
 pub struct Perspective {}
 
@@ -18,7 +22,10 @@ impl<'a> System<'a> for Perspective {
         WriteStorage<'a, Sighted>,
     );
 
-    fn run(&mut self, (entities, world_parameters, world_position, opaque, movable, mut sighted): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, world_parameters, world_position, opaque, movable, mut sighted): Self::SystemData,
+    ) {
         for (sighted_world_position, sighted) in (&world_position, &mut sighted).join() {
             sighted.seen.clear();
 
@@ -30,24 +37,32 @@ impl<'a> System<'a> for Perspective {
             let num_rays = (2.0 * PI * MAX_CELL_DISTANCE) as u32 * 2;
             let mut radians = 0.0;
             let radian_delta = (PI * 2.0) / num_rays as f64;
-            
+
             let mut seen_positions = HashSet::<WorldPosition>::new();
             seen_positions.insert(*sighted_world_position);
 
             for _ in 0..num_rays {
-                for ray_world_position in Raycast::new(*sighted_world_position, world_parameters.max_position(), radians - PI) {
+                for ray_world_position in Raycast::new(
+                    *sighted_world_position,
+                    world_parameters.max_position(),
+                    radians - PI,
+                ) {
                     seen_positions.insert(ray_world_position);
-                    if !has_opaque.contains(&ray_world_position) && sighted_world_position.distance_from(ray_world_position) < MAX_CELL_DISTANCE {
+                    if !has_opaque.contains(&ray_world_position)
+                        && sighted_world_position.distance_from(ray_world_position)
+                            < MAX_CELL_DISTANCE
+                    {
                         seen_positions.insert(ray_world_position);
-                    }
-                    else {
+                    } else {
                         break;
                     }
                 }
                 radians += radian_delta;
             }
 
-            for (entity, seen_world_position, movable) in (&entities, &world_position, (&movable).maybe()).join() {
+            for (entity, seen_world_position, movable) in
+                (&entities, &world_position, (&movable).maybe()).join()
+            {
                 if seen_positions.contains(seen_world_position) {
                     sighted.seen.add(entity.id());
                     if movable.is_none() {

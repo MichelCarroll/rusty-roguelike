@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use specs::prelude::*;
 
-use crate::game::{components::{
-    inventoried::Inventoried, pickupable::Pickupable,
-}, world::WorldPosition};
+use crate::game::{
+    components::{inventoried::Inventoried, pickupable::Pickupable},
+    world::WorldPosition,
+};
 
 pub struct Looting {}
 

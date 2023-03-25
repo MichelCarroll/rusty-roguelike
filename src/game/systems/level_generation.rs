@@ -8,15 +8,16 @@ use crate::game::{
         ai_controlled::AIControlled,
         armed::Armed,
         collidable::Collidable,
-        damageable::{Damageable},
+        damageable::Damageable,
         factioned::{Faction, Factioned},
         inventoried::Inventoried,
         level::Level,
         movable::{Direction, Movable},
+        opaque::Opaque,
         pickupable::Pickupable,
         player_controlled::PlayerControlled,
         rendered::{Render, ZLayer},
-        sighted::Sighted, opaque::Opaque,
+        sighted::Sighted,
     },
     random::{random_in_range, random_in_vec_and_remove},
     world::{WorldParameters, WorldPosition},
@@ -62,7 +63,7 @@ impl<'a> System<'a> for LevelGeneration {
             mut damageable,
             mut armed,
             mut sighted,
-            mut opaque
+            mut opaque,
         ): Self::SystemData,
     ) {
         for level in (&mut level).join() {
@@ -153,7 +154,13 @@ impl<'a> System<'a> for LevelGeneration {
                                 &mut factioned,
                             )
                             .with(Collidable {}, &mut collidable)
-                            .with(Damageable { health: 100, max_health: 100 }, &mut damageable)
+                            .with(
+                                Damageable {
+                                    health: 100,
+                                    max_health: 100,
+                                },
+                                &mut damageable,
+                            )
                             .with(
                                 Armed {
                                     damage: 5,
@@ -210,7 +217,13 @@ impl<'a> System<'a> for LevelGeneration {
                                     &mut factioned,
                                 )
                                 .with(Collidable {}, &mut collidable)
-                                .with(Damageable { health: 10, max_health: 10 }, &mut damageable)
+                                .with(
+                                    Damageable {
+                                        health: 10,
+                                        max_health: 10,
+                                    },
+                                    &mut damageable,
+                                )
                                 .with(
                                     Armed {
                                         damage: 1,

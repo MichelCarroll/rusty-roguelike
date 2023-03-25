@@ -20,7 +20,7 @@ use crate::game::{
         sighted::Sighted,
     },
     random::{random_in_range, random_in_vec_and_remove},
-    world::{WorldParameters, WorldPosition},
+    world::{WorldParameters, WorldPosition, WorldPositionLookupTable},
 };
 
 pub struct LevelGeneration {}
@@ -29,6 +29,7 @@ impl<'a> System<'a> for LevelGeneration {
     type SystemData = (
         Entities<'a>,
         Read<'a, WorldParameters>,
+        Write<'a, WorldPositionLookupTable>,
         WriteStorage<'a, Level>,
         WriteStorage<'a, WorldPosition>,
         WriteStorage<'a, Render>,
@@ -50,6 +51,7 @@ impl<'a> System<'a> for LevelGeneration {
         (
             entities,
             world_parameters,
+            mut world_position_lookup_table,
             mut level,
             mut world_position,
             mut render,
@@ -108,23 +110,23 @@ impl<'a> System<'a> for LevelGeneration {
                     for y in 0..world_parameters.height {
                         let position = WorldPosition { x, y };
                         if carved.contains(&position) {
-                            level.contents.push(
-                                entities
-                                    .build_entity()
-                                    .with(WorldPosition { x, y }, &mut world_position)
-                                    .with(floor_render.clone(), &mut render)
-                                    .build(),
-                            )
+                            let entity = entities
+                                .build_entity()
+                                .with(WorldPosition { x, y }, &mut world_position)
+                                .with(floor_render.clone(), &mut render)
+                                .build();
+                            level.contents.push(entity);
+                            world_position_lookup_table.update(entity, WorldPosition { x, y });
                         } else {
-                            level.contents.push(
-                                entities
+                            let entity = entities
                                     .build_entity()
                                     .with(WorldPosition { x, y }, &mut world_position)
                                     .with(stone_render.clone(), &mut render)
                                     .with(Collidable {}, &mut collidable)
                                     .with(Opaque::default(), &mut opaque)
-                                    .build(),
-                            )
+                                    .build();
+                            level.contents.push(entity);
+                            world_position_lookup_table.update(entity, WorldPosition { x, y });
                         }
                     }
                 }
@@ -139,38 +141,38 @@ impl<'a> System<'a> for LevelGeneration {
                         z_layer: ZLayer::Creature,
                     };
 
-                    level.contents.push(
-                        entities
-                            .build_entity()
-                            .with(player_position.clone(), &mut world_position)
-                            .with(character_render.clone(), &mut render)
-                            .with(PlayerControlled::default(), &mut player_controlled)
-                            .with(Movable::default(), &mut movable)
-                            .with(Inventoried::default(), &mut inventoried)
-                            .with(
-                                Factioned {
-                                    faction: Faction::Player,
-                                },
-                                &mut factioned,
-                            )
-                            .with(Collidable {}, &mut collidable)
-                            .with(
-                                Damageable {
-                                    health: 100,
-                                    max_health: 100,
-                                },
-                                &mut damageable,
-                            )
-                            .with(
-                                Armed {
-                                    damage: 5,
-                                    targetting: None,
-                                },
-                                &mut armed,
-                            )
-                            .with(Sighted::default(), &mut sighted)
-                            .build(),
-                    );
+                    let entity = entities
+                        .build_entity()
+                        .with(player_position.clone(), &mut world_position)
+                        .with(character_render.clone(), &mut render)
+                        .with(PlayerControlled::default(), &mut player_controlled)
+                        .with(Movable::default(), &mut movable)
+                        .with(Inventoried::default(), &mut inventoried)
+                        .with(
+                            Factioned {
+                                faction: Faction::Player,
+                            },
+                            &mut factioned,
+                        )
+                        .with(Collidable {}, &mut collidable)
+                        .with(
+                            Damageable {
+                                health: 100,
+                                max_health: 100,
+                            },
+                            &mut damageable,
+                        )
+                        .with(
+                            Armed {
+                                damage: 5,
+                                targetting: None,
+                            },
+                            &mut armed,
+                        )
+                        .with(Sighted::default(), &mut sighted)
+                        .build();
+                    level.contents.push(entity);
+                    world_position_lookup_table.update(entity, player_position);
                 }
 
                 let item_render = Render {
@@ -182,14 +184,14 @@ impl<'a> System<'a> for LevelGeneration {
 
                 for _ in 0..10 {
                     if let Some(&item_position) = random_in_vec_and_remove(&mut all_carved) {
-                        level.contents.push(
-                            entities
-                                .build_entity()
-                                .with(item_position.clone(), &mut world_position)
-                                .with(item_render.clone(), &mut render)
-                                .with(Pickupable::default(), &mut pickupable)
-                                .build(),
-                        );
+                        let entity = entities
+                            .build_entity()
+                            .with(item_position.clone(), &mut world_position)
+                            .with(item_render.clone(), &mut render)
+                            .with(Pickupable::default(), &mut pickupable)
+                            .build();
+                        level.contents.push(entity);
+                        world_position_lookup_table.update(entity, item_position);
                     }
                 }
 
@@ -202,37 +204,37 @@ impl<'a> System<'a> for LevelGeneration {
 
                 for _ in 0..5 {
                     if let Some(&monster_position) = random_in_vec_and_remove(&mut all_carved) {
-                        level.contents.push(
-                            entities
-                                .build_entity()
-                                .with(monster_position.clone(), &mut world_position)
-                                .with(monster_render.clone(), &mut render)
-                                .with(AIControlled::default(), &mut ai_controlled)
-                                .with(Movable::default(), &mut movable)
-                                .with(Inventoried::default(), &mut inventoried)
-                                .with(
-                                    Factioned {
-                                        faction: Faction::Enemy,
-                                    },
-                                    &mut factioned,
-                                )
-                                .with(Collidable {}, &mut collidable)
-                                .with(
-                                    Damageable {
-                                        health: 10,
-                                        max_health: 10,
-                                    },
-                                    &mut damageable,
-                                )
-                                .with(
-                                    Armed {
-                                        damage: 1,
-                                        targetting: None,
-                                    },
-                                    &mut armed,
-                                )
-                                .build(),
-                        );
+                        let entity = entities
+                            .build_entity()
+                            .with(monster_position.clone(), &mut world_position)
+                            .with(monster_render.clone(), &mut render)
+                            .with(AIControlled::default(), &mut ai_controlled)
+                            .with(Movable::default(), &mut movable)
+                            .with(Inventoried::default(), &mut inventoried)
+                            .with(
+                                Factioned {
+                                    faction: Faction::Enemy,
+                                },
+                                &mut factioned,
+                            )
+                            .with(Collidable {}, &mut collidable)
+                            .with(
+                                Damageable {
+                                    health: 10,
+                                    max_health: 10,
+                                },
+                                &mut damageable,
+                            )
+                            .with(
+                                Armed {
+                                    damage: 1,
+                                    targetting: None,
+                                },
+                                &mut armed,
+                            )
+                            .build();
+                        level.contents.push(entity);
+                        world_position_lookup_table.update(entity, monster_position);
                     }
                 }
             }

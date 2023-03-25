@@ -4,7 +4,7 @@ use specs::prelude::*;
 
 use crate::game::{
     components::{inventoried::Inventoried, pickupable::Pickupable},
-    world::WorldPosition,
+    world::{WorldPosition, WorldPositionLookupTable},
 };
 
 pub struct Looting {}
@@ -12,6 +12,7 @@ pub struct Looting {}
 impl<'a> System<'a> for Looting {
     type SystemData = (
         Entities<'a>,
+        Write<'a, WorldPositionLookupTable>,
         ReadStorage<'a, Pickupable>,
         WriteStorage<'a, WorldPosition>,
         WriteStorage<'a, Inventoried>,
@@ -19,7 +20,7 @@ impl<'a> System<'a> for Looting {
 
     fn run(
         &mut self,
-        (entities, pickupable, mut world_position, mut inventoried): Self::SystemData,
+        (entities, mut world_position_lookup_table, pickupable, mut world_position, mut inventoried): Self::SystemData,
     ) {
         let mut item_map: HashMap<WorldPosition, Vec<Entity>> = HashMap::new();
 
@@ -34,7 +35,7 @@ impl<'a> System<'a> for Looting {
         let mut items_to_process: Vec<Entity> = vec![];
 
         for (inventoried, inventoried_world_position) in
-            (&mut inventoried, &mut world_position).join()
+            (&mut inventoried, &world_position).join()
         {
             if let Some(items) = item_map.remove(&inventoried_world_position) {
                 for item in items {
@@ -46,6 +47,7 @@ impl<'a> System<'a> for Looting {
 
         for item in items_to_process {
             world_position.remove(item);
+            world_position_lookup_table.remove(item);
         }
     }
 }

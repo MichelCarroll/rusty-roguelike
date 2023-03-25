@@ -12,10 +12,10 @@ use game::{
     systems::{
         ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
         movement::Movement, perspective::Perspective, player_command_handler::PlayerCommandHandler,
-        rendering::Rendering, ui::UI,
+        rendering::Rendering, ui::UI
     },
     ui::game_ui::GameUI,
-    world::{LastUserEvent, UIState, WorldParameters, WorldPosition, WorldTime},
+    world::{LastUserEvent, UIState, WorldParameters, WorldPosition, WorldTime, WorldPositionLookupTable},
 };
 use gloo_timers::future::IntervalStream;
 use log::info;
@@ -105,8 +105,7 @@ pub async fn start() {
     world.insert(WorldParameters::from_canvas_size(canvas_size));
     world.insert(WorldTime::default());
     world.insert(UIState::default());
-
-    world.create_entity().with(Level::default()).build();
+    world.insert(WorldPositionLookupTable::default());
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(LevelGeneration {}, "level-generation", &[])
@@ -140,6 +139,10 @@ pub async fn start() {
             &["perspective"],
         )
         .build();
+
+    dispatcher.setup(&mut world);
+
+    world.create_entity().with(Level::default()).build();
 
     let (dx, rx) = mpsc::unbounded::<UIEvent>();
 

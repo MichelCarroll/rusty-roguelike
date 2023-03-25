@@ -113,20 +113,7 @@ impl<'a> System<'a> for Rendering {
                 let x = CELL_SIZE * pos.x as f64;
                 let y = CELL_SIZE * pos.y as f64;
 
-                let hovered = match ui_state.mouse_over {
-                    Some(CanvasPosition {
-                        x: mouse_x,
-                        y: mouse_y,
-                    }) => {
-                        let mouse_x = mouse_x as f64;
-                        let mouse_y = mouse_y as f64;
-                        mouse_x > x
-                            && mouse_x < x + CELL_SIZE
-                            && mouse_y > y
-                            && mouse_y < y + CELL_SIZE
-                    }
-                    None => false,
-                };
+                let hovered = ui_state.mouse_over_position().map(|p| p == pos).unwrap_or(false);
 
                 if let Some(background_color) = &render_target.background_color {
                     let mut color = *background_color;

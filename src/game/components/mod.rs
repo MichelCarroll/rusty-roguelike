@@ -12,3 +12,4 @@ pub mod player_controlled;
 pub mod rendered;
 pub mod sighted;
 pub mod world_position;
+pub mod describable;

@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use log::info;
 use specs::{Entity, World};
 
 use super::common::{CanvasPosition, CanvasSize, UIEvent};
@@ -48,6 +49,25 @@ pub struct UIState {
     pub mouse_over: Option<CanvasPosition>,
 }
 
+impl UIState {
+    pub fn mouse_over_position(&self) -> Option<WorldPosition> {
+        match self.mouse_over {
+            Some(CanvasPosition {
+                x: mouse_x,
+                y: mouse_y,
+            }) => {
+                let mouse_x = mouse_x as f64;
+                let mouse_y = mouse_y as f64;
+                WorldPosition { 
+                    x: (mouse_x / CELL_SIZE) as u64,
+                    y: (mouse_y / CELL_SIZE) as u64,
+                }.into()
+            }
+            None => None
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct WorldPositionLookupTable {
     pub world_position_entities: HashMap<WorldPosition, HashSet<Entity>>,
@@ -77,9 +97,14 @@ impl WorldPositionLookupTable {
         }
         else {
             self.entity_world_position.insert(entity, new_world_position);
-            let mut new_hash_set = HashSet::new();
-            new_hash_set.insert(entity);
-            self.world_position_entities.insert(new_world_position, new_hash_set);
+            if let Some(hash_map) = self.world_position_entities.get_mut(&new_world_position) {
+                hash_map.insert(entity);
+            }
+            else {
+                let mut new_hash_set = HashSet::new();
+                new_hash_set.insert(entity);
+                self.world_position_entities.insert(new_world_position, new_hash_set);
+            }
         }
     }
 

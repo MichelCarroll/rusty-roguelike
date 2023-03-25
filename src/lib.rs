@@ -1,6 +1,6 @@
 mod game;
 
-use futures::{channel::mpsc, StreamExt, future};
+use futures::{channel::mpsc, StreamExt, future, stream::select};
 use game::{
     common::{CanvasSize, UIEvent},
     components::{
@@ -15,8 +15,9 @@ use game::{
     },
     world::{LastUserEvent, WorldParameters, WorldPosition, WorldTime, UIState},
 };
+use gloo_timers::future::{TimeoutFuture, IntervalStream};
 use specs::prelude::*;
-use std::panic;
+use std::{panic, sync::Arc, time::Duration, ops::Range};
 use wasm_bindgen::prelude::*;
 
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement};
@@ -172,14 +173,25 @@ pub async fn start() {
     mouse_down_handler.forget();
 
 
-    rx.for_each(move |event| {
-        let mut last_user_event = world.write_resource::<LastUserEvent>();
-        last_user_event.event = event.into();
-        drop(last_user_event);
-        dispatcher.dispatch(&mut world);
-        world.maintain();
+    let render_request_stream = IntervalStream::new(16).map(|e| None);
+    let events_stream = select(rx.map(|e: UIEvent| Some(e)), render_request_stream);
+    let mut events_since_last_render: Vec<UIEvent> = vec![];
+    
+    events_stream.for_each(move |event| {
+        match event {
+            None => {
+                let mut last_user_event = world.write_resource::<LastUserEvent>();
+                last_user_event.events = events_since_last_render.drain(..).collect();
+                drop(last_user_event);
+                dispatcher.dispatch(&mut world);
+                world.maintain();
+            },
+            Some(event) => {
+                events_since_last_render.push(event);
+            }
+        }
         future::ready(())
     }).await;
     
-    
 }
+ 

@@ -15,6 +15,7 @@ specs-derive = "0.4.1"
 log = "0.4.17"
 futures = "0.3.27"
 wasm-bindgen-futures = "0.4.34"
+gloo-timers = { version="0.2.6", features=['futures'] }
 
 [dependencies.console_log]
 version = "1.0.0"

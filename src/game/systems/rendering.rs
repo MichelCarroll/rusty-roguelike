@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use log::info;
 use specs::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
@@ -7,7 +8,7 @@ use crate::game::{
     common::{CanvasSize, Color, CanvasPosition},
     components::{
         player_controlled::PlayerControlled, rendered::Render, sighted::Sighted, damageable::Damageable,
-    }, world::{WorldPosition, UIState},
+    }, world::{WorldPosition, UIState, WorldTime},
 };
 
 const CELL_SIZE: f64 = 50.0;
@@ -62,11 +63,12 @@ impl<'a> System<'a> for Rendering {
         ReadStorage<'a, PlayerControlled>,
         ReadStorage<'a, Sighted>,
         ReadStorage<'a, Damageable>,
-        Read<'a, UIState>
+        Write<'a, UIState>
     );
     
 
-    fn run(&mut self, (pos, render, player_controlled, sighted, damageable, ui_state): Self::SystemData) {
+    fn run(&mut self, (pos, render, player_controlled, sighted, damageable, mut ui_state): Self::SystemData) {
+
         let x_text_offset = CELL_SIZE / 2.0;
         let y_text_offset = CELL_SIZE / 2.0;
         self.rendering_context.set_font("bold 44px Arial");

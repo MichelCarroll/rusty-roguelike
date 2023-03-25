@@ -70,7 +70,7 @@ impl Color {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum UIEvent {
     Right,
     Left,

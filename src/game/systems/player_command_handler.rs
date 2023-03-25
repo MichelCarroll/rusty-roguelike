@@ -1,3 +1,4 @@
+use log::info;
 use specs::prelude::*;
 
 use crate::game::{
@@ -21,7 +22,7 @@ impl<'a> System<'a> for PlayerCommandHandler {
     );
 
     fn run(&mut self, (player_controlled, mut movable, mut last_user_event, mut world_time, mut ui_state): Self::SystemData) {
-        if let Some(user_event) = last_user_event.event.take() {
+        for user_event in last_user_event.events.iter() {
             for (_, movable) in (&player_controlled, &mut movable).join() {
                 match user_event {
                     UIEvent::Down => {
@@ -41,13 +42,14 @@ impl<'a> System<'a> for PlayerCommandHandler {
                         world_time.tick += 1;
                     },
                     UIEvent::MouseOver(x, y) => {
-                        ui_state.mouse_over = CanvasPosition { x, y }.into()
+                        ui_state.mouse_over = CanvasPosition { x: *x, y: *y }.into()
                     },
                     UIEvent::MousePress(x, y) => {
                         
-                    },
+                    }
                 }
             }
         }
+        last_user_event.events.clear();
     }
 }

@@ -2,7 +2,7 @@ use super::common::{UIEvent, CanvasPosition};
 
 #[derive(Default)]
 pub struct LastUserEvent {
-    pub event: Option<UIEvent>,
+    pub events: Vec<UIEvent>,
 }
 
 #[derive(Default)]
@@ -28,7 +28,7 @@ pub struct WorldTime {
     pub tick: u64
 }
 
-#[derive(Default)]
+#[derive(Default)] 
 pub struct UIState {
     pub mouse_over: Option<CanvasPosition>
 }

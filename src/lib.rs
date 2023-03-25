@@ -5,17 +5,19 @@ use game::{
     common::{CanvasPosition, CanvasSize, UIEvent},
     components::{
         ai_controlled::AIControlled, armed::Armed, collidable::Collidable, damageable::Damageable,
-        factioned::Factioned, inventoried::Inventoried, level::Level, movable::Movable,
-        opaque::Opaque, pickupable::Pickupable, player_controlled::PlayerControlled,
-        rendered::Render, sighted::Sighted, describable::Describable
+        describable::Describable, factioned::Factioned, inventoried::Inventoried, level::Level,
+        movable::Movable, opaque::Opaque, pickupable::Pickupable,
+        player_controlled::PlayerControlled, rendered::Render, sighted::Sighted,
     },
     systems::{
         ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
         movement::Movement, perspective::Perspective, player_command_handler::PlayerCommandHandler,
-        rendering::Rendering, ui::UI
+        rendering::Rendering, ui::UI,
     },
     ui::game_ui::GameUI,
-    world::{LastUserEvent, UIState, WorldParameters, WorldPosition, WorldTime, WorldPositionLookupTable},
+    world::{
+        LastUserEvent, UIState, WorldParameters, WorldPosition, WorldPositionLookupTable, WorldTime,
+    },
 };
 use gloo_timers::future::IntervalStream;
 use log::info;
@@ -127,7 +129,7 @@ pub async fn start() {
         .with(
             UI {
                 ui_state: game_ui.clone(),
-                last_mouse_over_position: None
+                last_mouse_over_position: None,
             },
             "ui",
             &["perspective", "looting", "combat", "movement"],
@@ -135,7 +137,7 @@ pub async fn start() {
         .with(
             Rendering {
                 canvas_size,
-                rendering_context: canvas_handle.context
+                rendering_context: canvas_handle.context,
             },
             "rendering",
             &["perspective"],
@@ -223,7 +225,10 @@ pub async fn start() {
 
     canvas_handle
         .canvas
-        .add_event_listener_with_callback("mouseleave", mouse_leave_handler.as_ref().unchecked_ref())
+        .add_event_listener_with_callback(
+            "mouseleave",
+            mouse_leave_handler.as_ref().unchecked_ref(),
+        )
         .unwrap();
     mouse_leave_handler.forget();
 

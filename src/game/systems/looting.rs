@@ -20,7 +20,13 @@ impl<'a> System<'a> for Looting {
 
     fn run(
         &mut self,
-        (entities, mut world_position_lookup_table, pickupable, mut world_position, mut inventoried): Self::SystemData,
+        (
+            entities,
+            mut world_position_lookup_table,
+            pickupable,
+            mut world_position,
+            mut inventoried,
+        ): Self::SystemData,
     ) {
         let mut item_map: HashMap<WorldPosition, Vec<Entity>> = HashMap::new();
 
@@ -34,8 +40,7 @@ impl<'a> System<'a> for Looting {
 
         let mut items_to_process: Vec<Entity> = vec![];
 
-        for (inventoried, inventoried_world_position) in
-            (&mut inventoried, &world_position).join()
+        for (inventoried, inventoried_world_position) in (&mut inventoried, &world_position).join()
         {
             if let Some(items) = item_map.remove(&inventoried_world_position) {
                 for item in items {

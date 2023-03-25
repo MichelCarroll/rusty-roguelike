@@ -101,5 +101,5 @@ pub enum UIEvent {
     Down,
     MouseOver(CanvasPosition),
     MousePress(CanvasPosition),
-    MouseLeave
+    MouseLeave,
 }

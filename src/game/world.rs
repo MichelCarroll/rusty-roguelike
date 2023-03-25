@@ -1,6 +1,5 @@
+use specs::Entity;
 use std::collections::{HashMap, HashSet};
-use log::info;
-use specs::{Entity, World};
 
 use super::common::{CanvasPosition, CanvasSize, UIEvent};
 
@@ -58,12 +57,13 @@ impl UIState {
             }) => {
                 let mouse_x = mouse_x as f64;
                 let mouse_y = mouse_y as f64;
-                WorldPosition { 
+                WorldPosition {
                     x: (mouse_x / CELL_SIZE) as u64,
                     y: (mouse_y / CELL_SIZE) as u64,
-                }.into()
+                }
+                .into()
             }
-            None => None
+            None => None,
         }
     }
 }
@@ -71,40 +71,33 @@ impl UIState {
 #[derive(Default)]
 pub struct WorldPositionLookupTable {
     pub world_position_entities: HashMap<WorldPosition, HashSet<Entity>>,
-    pub entity_world_position: HashMap<Entity, WorldPosition>
-}  
+    pub entity_world_position: HashMap<Entity, WorldPosition>,
+}
 
 impl WorldPositionLookupTable {
     pub fn update(&mut self, entity: Entity, new_world_position: WorldPosition) {
         let old_world_position = self.entity_world_position.get(&entity).map(|p| p.clone());
         if let Some(old_world_position) = old_world_position {
             if new_world_position == old_world_position {
-                return
+                return;
             }
-            self.entity_world_position.insert(entity, new_world_position);
-            if let Some(hash_map) = self.world_position_entities.get_mut(&new_world_position) {
-                hash_map.insert(entity);
-            }
-            else {
-                let mut new_hash_set = HashSet::new();
-                new_hash_set.insert(entity);
-                self.world_position_entities.insert(new_world_position, new_hash_set);
-            }
-
+            self.entity_world_position
+                .insert(entity, new_world_position);
             if let Some(hash_map) = self.world_position_entities.get_mut(&old_world_position) {
                 hash_map.remove(&entity);
             }
+        } else {
+            self.entity_world_position
+                .insert(entity, new_world_position);
         }
-        else {
-            self.entity_world_position.insert(entity, new_world_position);
-            if let Some(hash_map) = self.world_position_entities.get_mut(&new_world_position) {
-                hash_map.insert(entity);
-            }
-            else {
-                let mut new_hash_set = HashSet::new();
-                new_hash_set.insert(entity);
-                self.world_position_entities.insert(new_world_position, new_hash_set);
-            }
+
+        if let Some(hash_map) = self.world_position_entities.get_mut(&new_world_position) {
+            hash_map.insert(entity);
+        } else {
+            let mut new_hash_set = HashSet::new();
+            new_hash_set.insert(entity);
+            self.world_position_entities
+                .insert(new_world_position, new_hash_set);
         }
     }
 
@@ -112,7 +105,9 @@ impl WorldPositionLookupTable {
         let old_world_position = self.entity_world_position.get(&entity).map(|p| p.clone());
         self.entity_world_position.remove(&entity);
         if let Some(old_world_position) = old_world_position {
-            if let Some(entities_in_position) = self.world_position_entities.get_mut(&old_world_position) {
+            if let Some(entities_in_position) =
+                self.world_position_entities.get_mut(&old_world_position)
+            {
                 entities_in_position.remove(&entity);
             }
         }

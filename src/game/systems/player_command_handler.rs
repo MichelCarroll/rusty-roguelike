@@ -46,10 +46,8 @@ impl<'a> System<'a> for PlayerCommandHandler {
                     UIEvent::MouseOver(canvas_position) => {
                         ui_state.mouse_over = (*canvas_position).into();
                     }
-                    UIEvent::MousePress(_) => {},
-                    UIEvent::MouseLeave => {
-                        ui_state.mouse_over = None
-                    },
+                    UIEvent::MousePress(_) => {}
+                    UIEvent::MouseLeave => ui_state.mouse_over = None,
                 }
             }
         }

@@ -4,7 +4,7 @@ use specs::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
 use crate::game::{
-    common::{CanvasPosition, CanvasSize, Color},
+    common::{CanvasSize, Color},
     components::{
         damageable::Damageable, player_controlled::PlayerControlled, rendered::Render,
         sighted::Sighted,
@@ -17,7 +17,7 @@ const BACKGROUND_COLOR: &str = "#000000";
 
 pub struct Rendering {
     pub canvas_size: CanvasSize,
-    pub rendering_context: CanvasRenderingContext2d
+    pub rendering_context: CanvasRenderingContext2d,
 }
 
 struct RenderTarget<'a> {
@@ -113,7 +113,10 @@ impl<'a> System<'a> for Rendering {
                 let x = CELL_SIZE * pos.x as f64;
                 let y = CELL_SIZE * pos.y as f64;
 
-                let hovered = ui_state.mouse_over_position().map(|p| p == pos).unwrap_or(false);
+                let hovered = ui_state
+                    .mouse_over_position()
+                    .map(|p| p == pos)
+                    .unwrap_or(false);
 
                 if let Some(background_color) = &render_target.background_color {
                     let mut color = *background_color;

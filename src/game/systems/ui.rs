@@ -1,16 +1,18 @@
 use std::sync::Arc;
 
-use log::info;
 use specs::prelude::*;
 
 use crate::game::{
-    components::{damageable::Damageable, player_controlled::PlayerControlled, describable::Describable},
-    ui::game_ui::GameUI, world::{UIState, WorldPositionLookupTable, WorldPosition},
+    components::{
+        damageable::Damageable, describable::Describable, player_controlled::PlayerControlled,
+    },
+    ui::game_ui::GameUI,
+    world::{UIState, WorldPosition, WorldPositionLookupTable},
 };
 
 pub struct UI {
     pub ui_state: Arc<GameUI>,
-    pub last_mouse_over_position: Option<WorldPosition>
+    pub last_mouse_over_position: Option<WorldPosition>,
 }
 
 impl<'a> System<'a> for UI {
@@ -22,7 +24,10 @@ impl<'a> System<'a> for UI {
         Read<'a, WorldPositionLookupTable>,
     );
 
-    fn run(&mut self, (player_controlled, damageable, describable, ui_state, world_position_lookup_table): Self::SystemData) {
+    fn run(
+        &mut self,
+        (player_controlled, damageable, describable, ui_state, world_position_lookup_table): Self::SystemData,
+    ) {
         for (_, damageable) in (&player_controlled, &damageable).join() {
             self.ui_state.player_health.set(damageable.health)
         }
@@ -33,7 +38,10 @@ impl<'a> System<'a> for UI {
         let mut lock = self.ui_state.inspected_entities.lock_mut();
         lock.clear();
         if let Some(mouse_position) = mouse_position {
-            if let Some(entities) = world_position_lookup_table.world_position_entities.get(&mouse_position) {
+            if let Some(entities) = world_position_lookup_table
+                .world_position_entities
+                .get(&mouse_position)
+            {
                 for entity in entities {
                     if let Some(description) = describable.get(*entity) {
                         lock.push_cloned(description.description.clone());

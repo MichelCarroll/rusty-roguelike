@@ -9,6 +9,7 @@ use crate::game::{
         armed::Armed,
         collidable::Collidable,
         damageable::Damageable,
+        describable::Describable,
         factioned::{Faction, Factioned},
         inventoried::Inventoried,
         level::Level,
@@ -17,7 +18,7 @@ use crate::game::{
         pickupable::Pickupable,
         player_controlled::PlayerControlled,
         rendered::{Render, ZLayer},
-        sighted::Sighted, describable::Describable,
+        sighted::Sighted,
     },
     random::{random_in_range, random_in_vec_and_remove},
     world::{WorldParameters, WorldPosition, WorldPositionLookupTable},
@@ -115,20 +116,30 @@ impl<'a> System<'a> for LevelGeneration {
                             let entity = entities
                                 .build_entity()
                                 .with(WorldPosition { x, y }, &mut world_position)
-                                .with(Describable { description: "Floor".to_owned() }, &mut describable)
+                                .with(
+                                    Describable {
+                                        description: "Floor".to_owned(),
+                                    },
+                                    &mut describable,
+                                )
                                 .with(floor_render.clone(), &mut render)
                                 .build();
                             level.contents.push(entity);
                             world_position_lookup_table.update(entity, WorldPosition { x, y });
                         } else {
                             let entity = entities
-                                    .build_entity()
-                                    .with(WorldPosition { x, y }, &mut world_position)
-                                    .with(Describable { description: "Stone Wall".to_owned() }, &mut describable)
-                                    .with(stone_render.clone(), &mut render)
-                                    .with(Collidable {}, &mut collidable)
-                                    .with(Opaque::default(), &mut opaque)
-                                    .build();
+                                .build_entity()
+                                .with(WorldPosition { x, y }, &mut world_position)
+                                .with(
+                                    Describable {
+                                        description: "Stone Wall".to_owned(),
+                                    },
+                                    &mut describable,
+                                )
+                                .with(stone_render.clone(), &mut render)
+                                .with(Collidable {}, &mut collidable)
+                                .with(Opaque::default(), &mut opaque)
+                                .build();
                             level.contents.push(entity);
                             world_position_lookup_table.update(entity, WorldPosition { x, y });
                         }
@@ -149,7 +160,12 @@ impl<'a> System<'a> for LevelGeneration {
                         .build_entity()
                         .with(player_position.clone(), &mut world_position)
                         .with(character_render.clone(), &mut render)
-                        .with(Describable { description: "Player".to_owned() }, &mut describable)
+                        .with(
+                            Describable {
+                                description: "Player".to_owned(),
+                            },
+                            &mut describable,
+                        )
                         .with(PlayerControlled::default(), &mut player_controlled)
                         .with(Movable::default(), &mut movable)
                         .with(Inventoried::default(), &mut inventoried)
@@ -193,7 +209,12 @@ impl<'a> System<'a> for LevelGeneration {
                             .build_entity()
                             .with(item_position.clone(), &mut world_position)
                             .with(item_render.clone(), &mut render)
-                            .with(Describable { description: "Gold".to_owned() }, &mut describable)
+                            .with(
+                                Describable {
+                                    description: "Gold".to_owned(),
+                                },
+                                &mut describable,
+                            )
                             .with(Pickupable::default(), &mut pickupable)
                             .build();
                         level.contents.push(entity);
@@ -214,7 +235,12 @@ impl<'a> System<'a> for LevelGeneration {
                             .build_entity()
                             .with(monster_position.clone(), &mut world_position)
                             .with(monster_render.clone(), &mut render)
-                            .with(Describable { description: "Monster".to_owned() }, &mut describable)
+                            .with(
+                                Describable {
+                                    description: "Monster".to_owned(),
+                                },
+                                &mut describable,
+                            )
                             .with(AIControlled::default(), &mut ai_controlled)
                             .with(Movable::default(), &mut movable)
                             .with(Inventoried::default(), &mut inventoried)

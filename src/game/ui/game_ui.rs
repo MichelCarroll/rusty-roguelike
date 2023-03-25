@@ -1,4 +1,4 @@
-use dominator::{html, Dom, clone};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals::signal_vec::{MutableVec, SignalVecExt};
 
@@ -6,14 +6,14 @@ use std::sync::Arc;
 
 pub struct GameUI {
     pub player_health: Mutable<u32>,
-    pub inspected_entities: MutableVec<String>
+    pub inspected_entities: MutableVec<String>,
 }
 
 impl GameUI {
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
             player_health: Mutable::new(0),
-            inspected_entities: MutableVec::new()
+            inspected_entities: MutableVec::new(),
         })
     }
 

@@ -7,7 +7,7 @@ use game::{
         ai_controlled::AIControlled, armed::Armed, collidable::Collidable, damageable::Damageable,
         describable::Describable, factioned::Factioned, inventoried::Inventoried, level::Level,
         movable::Movable, opaque::Opaque, pickupable::Pickupable,
-        player_controlled::PlayerControlled, rendered::Render, sighted::Sighted,
+        player_controlled::PlayerControlled, rendered::Render, sighted::Sighted, climbable::Climbable
     },
     systems::{
         ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
@@ -103,7 +103,8 @@ pub async fn start() {
     world.register::<Sighted>();
     world.register::<Opaque>();
     world.register::<Describable>();
-    info!("{:?}", WorldParameters::from_canvas_size(canvas_size));
+    world.register::<Climbable>();
+    
     world.insert(LastUserEvent::default());
     world.insert(WorldParameters::from_canvas_size(canvas_size));
     world.insert(WorldTime::default());

@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use log::info;
 use specs::prelude::*;
 
 use crate::game::{
@@ -87,6 +88,13 @@ impl<'a> System<'a> for LevelGeneration {
                     z_layer: ZLayer::Saturating,
                 };
 
+                let stairs_render = Render {
+                    glyph: '>'.into(),
+                    foreground_color: Color::mildew(),
+                    background_color: Color::brown().into(),
+                    z_layer: ZLayer::Ground,
+                };
+
                 let mut automata: Vec<WorldPosition> = vec![];
                 let mut carved = HashSet::<WorldPosition>::new();
 
@@ -109,10 +117,27 @@ impl<'a> System<'a> for LevelGeneration {
                     }
                 }
 
+                let stairs_positions: HashSet<WorldPosition> = carved.iter().take(1).map(|p| *p).collect();
+
                 for x in 0..world_parameters.width {
                     for y in 0..world_parameters.height {
                         let position = WorldPosition { x, y };
-                        if carved.contains(&position) {
+                        if stairs_positions.contains(&position) {
+                            let entity = entities
+                                .build_entity()
+                                .with(position.clone(), &mut world_position)
+                                .with(stairs_render.clone(), &mut render)
+                                .with(
+                                    Describable {
+                                        description: "Stairs".to_owned(),
+                                    },
+                                    &mut describable,
+                                )
+                                .build();
+                            level.contents.push(entity);
+                            world_position_lookup_table.update(entity, position);
+                        }
+                        else if carved.contains(&position) {
                             let entity = entities
                                 .build_entity()
                                 .with(WorldPosition { x, y }, &mut world_position)

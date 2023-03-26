@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
-use log::info;
 use specs::prelude::*;
 
 use crate::game::{
     components::{
-        damageable::Damageable, describable::Describable, player_controlled::PlayerControlled, sighted::Sighted,
+        damageable::Damageable, describable::Describable, player_controlled::PlayerControlled,
+        sighted::Sighted,
     },
     ui::game_ui::GameUI,
     world::{UIState, WorldPosition, WorldPositionLookupTable},
@@ -28,7 +28,14 @@ impl<'a> System<'a> for UI {
 
     fn run(
         &mut self,
-        (player_controlled, damageable, describable, sighted, ui_state, world_position_lookup_table): Self::SystemData,
+        (
+            player_controlled,
+            damageable,
+            describable,
+            sighted,
+            ui_state,
+            world_position_lookup_table,
+        ): Self::SystemData,
     ) {
         for (_, damageable) in (&player_controlled, &damageable).join() {
             self.ui_state.player_health.set(damageable.health)
@@ -48,7 +55,9 @@ impl<'a> System<'a> for UI {
                     .get(&mouse_position)
                 {
                     for entity in entities {
-                        if !sighted.seen.contains(entity.id()) && !sighted.seen_recently.contains(entity.id()) {
+                        if !sighted.seen.contains(entity.id())
+                            && !sighted.seen_recently.contains(entity.id())
+                        {
                             continue;
                         }
                         if let Some(description) = describable.get(*entity) {
@@ -59,6 +68,5 @@ impl<'a> System<'a> for UI {
                 self.last_mouse_over_position = mouse_position.into();
             }
         }
-        
     }
 }

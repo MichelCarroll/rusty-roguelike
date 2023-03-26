@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use specs::prelude::*;
 
 use crate::game::{
-    components::{inventoried::Inventoried, pickupable::Pickupable},
+    components::{inventoried::Inventoried, pickupable::Pickupable, parent::Parent},
     world::{WorldPosition, WorldPositionLookupTable},
 };
 
@@ -16,6 +16,7 @@ impl<'a> System<'a> for Looting {
         ReadStorage<'a, Pickupable>,
         WriteStorage<'a, WorldPosition>,
         WriteStorage<'a, Inventoried>,
+        WriteStorage<'a, Parent>
     );
 
     fn run(
@@ -26,26 +27,23 @@ impl<'a> System<'a> for Looting {
             pickupable,
             mut world_position,
             mut inventoried,
+            mut parent
         ): Self::SystemData,
     ) {
-        let mut item_map: HashMap<WorldPosition, Vec<Entity>> = HashMap::new();
-
-        for (entity, _, item_world_position) in (&entities, &pickupable, &world_position).join() {
-            if let Some(items) = item_map.get_mut(item_world_position) {
-                items.push(entity);
-            } else {
-                item_map.insert(*item_world_position, vec![entity]);
-            }
-        }
-
         let mut items_to_process: Vec<Entity> = vec![];
 
-        for (inventoried, inventoried_world_position) in (&mut inventoried, &world_position).join()
+        for (inventoried_entity, inventoried, inventoried_world_position) in (&entities, &mut inventoried, &world_position).join()
         {
-            if let Some(items) = item_map.remove(&inventoried_world_position) {
-                for item in items {
-                    items_to_process.push(item);
-                    inventoried.contents.push(item);
+            if let Some(entities) = world_position_lookup_table.world_position_entities.get(&inventoried_world_position) {
+                for entity in entities {
+                    match (pickupable.get(*entity), parent.get_mut(*entity)) {
+                        (Some(_), Some(parent)) => {
+                            items_to_process.push(*entity);
+                            inventoried.contents.push(*entity);
+                            parent.entity = inventoried_entity;
+                        },
+                        _ => {}
+                    }
                 }
             }
         }

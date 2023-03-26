@@ -1,7 +1,12 @@
+use std::ops::Not;
 
+use log::info;
 use specs::prelude::*;
 
-use crate::game::{components::{player_controlled::PlayerControlled, climbable::Climbable, level::Level}, world::{WorldPositionLookupTable, WorldPosition}};
+use crate::game::{
+    components::{climbable::Climbable, level::Level, player_controlled::PlayerControlled, parent::Parent},
+    world::{WorldPosition, WorldPositionLookupTable},
+};
 
 pub struct Climbing {}
 
@@ -12,16 +17,28 @@ impl<'a> System<'a> for Climbing {
         ReadStorage<'a, Climbable>,
         ReadStorage<'a, WorldPosition>,
         WriteStorage<'a, Level>,
+        WriteStorage<'a, Parent>,
         Write<'a, WorldPositionLookupTable>,
     );
 
     fn run(
         &mut self,
-        (entities, player_controlled, climbable, world_position, mut level, mut world_position_lookup_table): Self::SystemData,
+        (
+            entities,
+            player_controlled,
+            climbable,
+            world_position,
+            mut level,
+            mut parent,
+            mut world_position_lookup_table,
+        ): Self::SystemData,
     ) {
         let mut next_level = false;
         for (_, world_position) in (&player_controlled, &world_position).join() {
-            if let Some(entities) = world_position_lookup_table.world_position_entities.get(world_position) {
+            if let Some(entities) = world_position_lookup_table
+                .world_position_entities
+                .get(world_position)
+            {
                 for entity in entities {
                     if climbable.get(*entity).is_some() {
                         next_level = true;
@@ -31,15 +48,31 @@ impl<'a> System<'a> for Climbing {
         }
 
         if next_level {
-            for entity in (&entities).join() {
-                entities.delete(entity).unwrap();
-                world_position_lookup_table.remove(entity);
+
+            let mut old_level: Option<(Entity, &mut Parent)> = None;
+            for (entity, _, parent) in (&entities, &level, &mut parent).join() {
+                old_level = (entity, parent).into();
+            }
+            
+            if let Some((old_level_entity, old_entity_parent)) = old_level {
+
+                entities.build_entity()
+                    .with(Level::default(), &mut level)
+                    .with(Parent { entity: old_entity_parent.entity }, &mut parent)
+                    .build();
+                
+                entities.delete(old_level_entity).unwrap();
+                
+                for (entity, entity_parent) in (&entities, &parent).join() {
+                    if entity_parent.entity == old_level_entity {
+                        entities.delete(entity).unwrap();
+                        world_position_lookup_table.remove(entity);
+                    }
+                }
             }
 
-            entities
-                .build_entity()
-                .with(Level::default(), &mut level)
-                .build();
+            world_position_lookup_table.clear();
         }
     }
 }
+ 

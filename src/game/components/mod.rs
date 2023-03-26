@@ -1,5 +1,6 @@
 pub mod ai_controlled;
 pub mod armed;
+pub mod climbable;
 pub mod collidable;
 pub mod damageable;
 pub mod describable;
@@ -8,9 +9,9 @@ pub mod inventoried;
 pub mod level;
 pub mod movable;
 pub mod opaque;
+pub mod parent;
 pub mod pickupable;
 pub mod player_controlled;
 pub mod rendered;
 pub mod sighted;
 pub mod world_position;
-pub mod climbable;

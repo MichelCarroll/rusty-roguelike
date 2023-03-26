@@ -4,15 +4,17 @@ use futures::{channel::mpsc, future, stream::select, StreamExt};
 use game::{
     common::{CanvasPosition, CanvasSize, UIEvent},
     components::{
-        ai_controlled::AIControlled, armed::Armed, collidable::Collidable, damageable::Damageable,
-        describable::Describable, factioned::Factioned, inventoried::Inventoried, level::Level,
-        movable::Movable, opaque::Opaque, pickupable::Pickupable,
-        player_controlled::PlayerControlled, rendered::Render, sighted::Sighted, climbable::Climbable
+        ai_controlled::AIControlled, armed::Armed, climbable::Climbable, collidable::Collidable,
+        damageable::Damageable, describable::Describable, factioned::Factioned,
+        inventoried::Inventoried, level::Level, movable::Movable, opaque::Opaque, parent::Parent,
+        pickupable::Pickupable, player_controlled::PlayerControlled, rendered::Render,
+        sighted::Sighted,
     },
+    hierarchy::{Hierarchy, HierarchySystem},
     systems::{
-        ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
-        movement::Movement, perspective::Perspective, player_command_handler::PlayerCommandHandler,
-        rendering::Rendering, ui::UI, climbing::Climbing,
+        ai::AI, climbing::Climbing, combat::Combat, level_generation::LevelGeneration,
+        looting::Looting, movement::Movement, perspective::Perspective,
+        player_command_handler::PlayerCommandHandler, rendering::Rendering, ui::UI,
     },
     ui::game_ui::GameUI,
     world::{
@@ -104,7 +106,8 @@ pub async fn start() {
     world.register::<Opaque>();
     world.register::<Describable>();
     world.register::<Climbable>();
-    
+    world.register::<Parent>();
+
     world.insert(LastUserEvent::default());
     world.insert(WorldParameters::from_canvas_size(canvas_size));
     world.insert(WorldTime::default());
@@ -112,6 +115,11 @@ pub async fn start() {
     world.insert(WorldPositionLookupTable::default());
 
     let mut dispatcher = DispatcherBuilder::new()
+        .with(
+            HierarchySystem::<Parent>::new(&mut world),
+            "hierarchy_system",
+            &[],
+        )
         .with(LevelGeneration {}, "level-generation", &[])
         .with(
             PlayerCommandHandler {},
@@ -148,7 +156,8 @@ pub async fn start() {
 
     dispatcher.setup(&mut world);
 
-    world.create_entity().with(Level::default()).build();
+    let root = world.create_entity().build();
+    let level = world.create_entity().with(Level::default()).with(Parent { entity: root }).build();
 
     let (dx, rx) = mpsc::unbounded::<UIEvent>();
 
@@ -168,6 +177,10 @@ pub async fn start() {
         }
         e.prevent_default();
     });
+
+    for entity in world.read_resource::<Hierarchy<Parent>>().all() {
+        println!("{:?}", entity);
+    }
 
     web_sys::window()
         .unwrap()

@@ -2,7 +2,7 @@ use specs::{Component, Entity, HashMapStorage};
 
 #[derive(Default)]
 pub struct Level {
-    pub contents: Vec<Entity>,
+    pub generated: bool,
 }
 
 impl Component for Level {

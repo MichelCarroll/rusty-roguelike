@@ -557,8 +557,10 @@ dependencies = [
  "futures",
  "futures-signals",
  "gloo-timers",
+ "hibitset",
  "js-sys",
  "log",
+ "shrev",
  "specs",
  "specs-derive",
  "wasm-bindgen",
@@ -595,8 +597,20 @@ dependencies = [
  "arrayvec",
  "hashbrown",
  "mopa",
+ "shred-derive",
  "smallvec",
  "tynm",
+]
+
+[[package]]
+name = "shred-derive"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5404c36bd155e41a54276ab6aafedad2fb627e5e5849d36ec439c9ddc044a2f"
+dependencies = [
+ "proc-macro2 1.0.52",
+ "quote 1.0.26",
+ "syn 1.0.109",
 ]
 
 [[package]]

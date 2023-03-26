@@ -1,7 +1,8 @@
+use log::info;
 use specs::prelude::*;
 
 use crate::game::{
-    components::{armed::Armed, damageable::Damageable},
+    components::{armed::Armed, damageable::Damageable, factioned::Factioned},
     world::WorldPositionLookupTable,
 };
 
@@ -19,8 +20,11 @@ impl<'a> System<'a> for Combat {
         &mut self,
         (entities, mut world_position_lookup_table, mut armed, mut damageable): Self::SystemData,
     ) {
-        for armed in (&mut armed).join() {
+        for (armed_entity, armed) in (&entities, &mut armed).join() {
             if let Some(target) = armed.targetting.take() {
+                if target == armed_entity {
+                    continue;
+                }
                 if let Some(damage) = damageable.get_mut(target) {
                     damage.health = damage.health.checked_sub(armed.damage).unwrap_or(0);
                     if damage.health == 0 {

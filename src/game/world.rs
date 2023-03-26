@@ -112,4 +112,9 @@ impl WorldPositionLookupTable {
             }
         }
     }
+
+    pub fn clear(&mut self) {
+        self.entity_world_position.clear();
+        self.world_position_entities.clear();
+    }
 }

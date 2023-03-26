@@ -12,7 +12,7 @@ use game::{
     systems::{
         ai::AI, combat::Combat, level_generation::LevelGeneration, looting::Looting,
         movement::Movement, perspective::Perspective, player_command_handler::PlayerCommandHandler,
-        rendering::Rendering, ui::UI,
+        rendering::Rendering, ui::UI, climbing::Climbing,
     },
     ui::game_ui::GameUI,
     world::{
@@ -120,6 +120,7 @@ pub async fn start() {
         )
         .with(AI::default(), "ai", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
+        .with(Climbing {}, "climbing", &["movement"])
         .with(Combat {}, "combat", &["movement"])
         .with(Looting {}, "looting", &["movement"])
         .with(

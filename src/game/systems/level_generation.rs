@@ -19,7 +19,7 @@ use crate::game::{
         pickupable::Pickupable,
         player_controlled::PlayerControlled,
         rendered::{Render, ZLayer},
-        sighted::Sighted,
+        sighted::Sighted, climbable::{Climbable, self},
     },
     random::{random_in_range, random_in_vec_and_remove},
     world::{WorldParameters, WorldPosition, WorldPositionLookupTable},
@@ -47,6 +47,7 @@ impl<'a> System<'a> for LevelGeneration {
         WriteStorage<'a, Sighted>,
         WriteStorage<'a, Opaque>,
         WriteStorage<'a, Describable>,
+        WriteStorage<'a, Climbable>,
     );
 
     fn run(
@@ -70,6 +71,7 @@ impl<'a> System<'a> for LevelGeneration {
             mut sighted,
             mut opaque,
             mut describable,
+            mut climbable
         ): Self::SystemData,
     ) {
         for level in (&mut level).join() {
@@ -133,6 +135,7 @@ impl<'a> System<'a> for LevelGeneration {
                                     },
                                     &mut describable,
                                 )
+                                .with(Climbable::default(), &mut climbable)
                                 .build();
                             level.contents.push(entity);
                             world_position_lookup_table.update(entity, position);

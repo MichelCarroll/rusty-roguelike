@@ -4,7 +4,7 @@ use log::info;
 use specs::prelude::*;
 
 use crate::game::{
-    components::{climbable::Climbable, level::Level, player_controlled::PlayerControlled, parent::Parent},
+    components::{climbable::Climbable, level::Level, player_controlled::PlayerControlled, parent::Parent, sighted::{Sighted, self}},
     world::{WorldPosition, WorldPositionLookupTable},
 };
 
@@ -18,6 +18,7 @@ impl<'a> System<'a> for Climbing {
         ReadStorage<'a, WorldPosition>,
         WriteStorage<'a, Level>,
         WriteStorage<'a, Parent>,
+        WriteStorage<'a, Sighted>,
         Write<'a, WorldPositionLookupTable>,
     );
 
@@ -30,6 +31,7 @@ impl<'a> System<'a> for Climbing {
             world_position,
             mut level,
             mut parent,
+            mut sighted,
             mut world_position_lookup_table,
         ): Self::SystemData,
     ) {
@@ -62,6 +64,11 @@ impl<'a> System<'a> for Climbing {
                     .build();
                 
                 entities.delete(old_level_entity).unwrap();
+
+                for (sighted, _) in (&mut sighted, &player_controlled).join() {
+                    sighted.seen.clear();
+                    sighted.seen_recently.clear();
+                }
                 
                 for (entity, entity_parent) in (&entities, &parent).join() {
                     if entity_parent.entity == old_level_entity {

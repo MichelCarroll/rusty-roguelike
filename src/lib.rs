@@ -128,7 +128,6 @@ pub async fn start() {
         )
         .with(AI::default(), "ai", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
-        .with(Climbing {}, "climbing", &["movement"])
         .with(Combat {}, "combat", &["movement"])
         .with(Looting {}, "looting", &["movement"])
         .with(
@@ -136,6 +135,7 @@ pub async fn start() {
             "perspective",
             &["movement", "combat", "looting"],
         )
+        .with(Climbing {}, "climbing", &["perspective"])
         .with(
             UI {
                 ui_state: game_ui.clone(),

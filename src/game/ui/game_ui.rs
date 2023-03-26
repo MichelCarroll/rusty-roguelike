@@ -7,6 +7,7 @@ use std::sync::Arc;
 pub struct GameUI {
     pub player_health: Mutable<u32>,
     pub inspected_entities: MutableVec<String>,
+    pub inventory_entities: MutableVec<String>,
 }
 
 impl GameUI {
@@ -14,6 +15,7 @@ impl GameUI {
         Arc::new(Self {
             player_health: Mutable::new(0),
             inspected_entities: MutableVec::new(),
+            inventory_entities: MutableVec::new(),
         })
     }
 
@@ -40,7 +42,24 @@ impl GameUI {
                     .children_signal_vec(state.inspected_entities.signal_vec_cloned()
                         .map(clone!(state => move |description| {
                             html!("li", {
-                                .class("player-health")
+                                .class("inspected")
+                                .text(&description)
+                            })
+                        }))
+                    )
+                }),
+            ])
+            .children(&mut [
+                html!("hr", {})
+            ])
+
+            .children(&mut [
+                html!("ul", {
+                    .class("inventory-result")
+                    .children_signal_vec(state.inventory_entities.signal_vec_cloned()
+                        .map(clone!(state => move |description| {
+                            html!("li", {
+                                .class("inventoried")
                                 .text(&description)
                             })
                         }))

@@ -103,7 +103,7 @@ impl<'a> System<'a> for LevelGeneration {
                 glyph: '>'.into(),
                 foreground_color: Color::mildew(),
                 background_color: Color::brown().into(),
-                z_layer: ZLayer::Ground,
+                z_layer: ZLayer::Saturating,
             };
 
             let mut automata: Vec<WorldPosition> = vec![];
@@ -185,15 +185,15 @@ impl<'a> System<'a> for LevelGeneration {
 
             let mut all_carved: Vec<_> = carved.iter().collect();
 
-            let mut old_player_position: Option<(Entity, &mut WorldPosition)> = None;
-            for (entity, _, world_position) in (&entities, &player_controlled, &mut world_position).join() {
-                old_player_position = (entity, world_position).into();
+            let mut old_player: Option<Entity> = None;
+            for (entity, _) in (&entities, &player_controlled).join() {
+                old_player = entity.into();
             }
 
             if let Some(&player_position) = random_in_vec_and_remove(&mut all_carved) {
-                if let Some(old_player_position) = old_player_position {
-                    *(old_player_position.1) = player_position;
-                    world_position_lookup_table.update(old_player_position.0, player_position);
+                if let Some(old_player) = old_player {
+                    world_position.insert(old_player, player_position).unwrap();
+                    world_position_lookup_table.update(old_player, player_position);
                 }
                 else {
                     let character_render = Render {

@@ -15,7 +15,7 @@ impl<'a> System<'a> for Climbing {
         Entities<'a>,
         ReadStorage<'a, PlayerControlled>,
         ReadStorage<'a, Climbable>,
-        ReadStorage<'a, WorldPosition>,
+        WriteStorage<'a, WorldPosition>,
         WriteStorage<'a, Level>,
         WriteStorage<'a, Parent>,
         WriteStorage<'a, Sighted>,
@@ -28,7 +28,7 @@ impl<'a> System<'a> for Climbing {
             entities,
             player_controlled,
             climbable,
-            world_position,
+            mut world_position,
             mut level,
             mut parent,
             mut sighted,
@@ -65,9 +65,10 @@ impl<'a> System<'a> for Climbing {
                 
                 entities.delete(old_level_entity).unwrap();
 
-                for (sighted, _) in (&mut sighted, &player_controlled).join() {
+                for (entity, sighted, _) in (&entities, &mut sighted, &player_controlled).join() {
                     sighted.seen.clear();
                     sighted.seen_recently.clear();
+                    world_position.remove(entity);
                 }
                 
                 for (entity, entity_parent) in (&entities, &parent).join() {

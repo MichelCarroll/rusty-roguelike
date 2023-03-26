@@ -128,18 +128,19 @@ pub async fn start() {
         )
         .with(AI::default(), "ai", &["level-generation"])
         .with(Movement {}, "movement", &["player-command-handling"])
-        .with(Combat {}, "combat", &["movement"])
-        .with(Looting {}, "looting", &["movement"])
+        .with(Climbing {}, "climbing", &["movement"])
+        .with(Combat {}, "combat", &["movement", "climbing"])
+        .with(Looting {}, "looting", &["climbing"])
         .with(
             Perspective {},
             "perspective",
-            &["movement", "combat", "looting"],
+            &["combat", "climbing", "looting"],
         )
-        .with(Climbing {}, "climbing", &["perspective"])
         .with(
             UI {
                 ui_state: game_ui.clone(),
                 last_mouse_over_position: None,
+                past_children_bitset: BitSet::default().into()
             },
             "ui",
             &["perspective", "looting", "combat", "movement"],
